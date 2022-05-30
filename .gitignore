@@ -40,3 +40,8 @@
 
 # Python cache
 __pycache__
+
+# Pip
+dist
+src/justpfm.egg-info
+
