@@ -1,3 +1,5 @@
+"""Common objects used in unit tests"""
+
 import numpy as np
 import pytest
 
