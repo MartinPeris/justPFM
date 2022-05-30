@@ -1,9 +1,8 @@
 """
 A small Python module to read/write PFM (Portable Float Map) images
 """
-
-from setuptools import setup, find_packages
 import pathlib
+from setuptools import setup, find_packages
 
 here = pathlib.Path(__file__).parent.resolve()
 
@@ -40,16 +39,7 @@ setup(
         "dev": ["check-manifest"],
         "test": ["pytest", "pytest-cov"],
     },
-    # List additional URLs that are relevant to your project as a dict.
-    #
-    # This field corresponds to the "Project-URL" metadata fields:
-    # https://packaging.python.org/specifications/core-metadata/#project-url-multiple-use
-    #
-    # Examples listed include a pattern for specifying where the package tracks
-    # issues, where the source is hosted, where to say thanks to the package
-    # maintainers, and where to support the project financially. The key is
-    # what's used to render the link text on PyPI.
-    project_urls={  # Optional
+    project_urls={
         "Bug Reports": "https://github.com/MartinPeris/justPFM/issues",
         "Source": "https://github.com/MartinPeris/justPFM",
     },
