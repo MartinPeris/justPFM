@@ -1,3 +1,4 @@
+"""Unit tests for justpfm"""
 from pathlib import Path
 
 import numpy as np
@@ -102,7 +103,7 @@ def test_get_pfm_width_and_height_from_line_valid():
     width = 6
     height = 5
     assert _get_pfm_width_and_height_from_line(
-        ("%d %d\n" % (width, height)).encode()
+        (f"{width} {height}\n").encode()
     ) == (width, height)
 
 
