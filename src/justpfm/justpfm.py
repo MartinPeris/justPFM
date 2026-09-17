@@ -1,6 +1,7 @@
 """A small Python module to read/write PFM (Portable Float Map) images"""
 
 from math import isclose, isfinite
+from os import fstat
 from pathlib import Path
 from sys import byteorder
 from typing import Tuple
@@ -43,6 +44,8 @@ def _get_pfm_identifier_from_data(data: np.ndarray) -> str:
 
 def _is_valid_shape(data: np.ndarray) -> bool:
     """Return true if the shape of the data is valid"""
+    if 0 in data.shape:
+        return False
     if len(data.shape) == 2:
         return True
 
@@ -72,7 +75,17 @@ def read_pfm(file_name: Path) -> np.ndarray:
         channels = _get_pfm_channels_from_line(file.readline())
         width, height = _get_pfm_width_and_height_from_line(file.readline())
         scale, endianness = _get_pfm_scale_and_endianness_from_line(file.readline())
-        data = np.fromfile(file, endianness + "f")
+        sample_count = width * height * channels
+        expected_bytes = sample_count * 4
+        remaining_bytes = fstat(file.fileno()).st_size - file.tell()
+        if remaining_bytes != expected_bytes:
+            raise ValueError(
+                f"Invalid PFM payload size: expected {expected_bytes} bytes, "
+                f"got {remaining_bytes}"
+            )
+        data = np.fromfile(file, endianness + "f", count=sample_count)
+        if data.size != sample_count:
+            raise ValueError("PFM payload was truncated while reading")
         shape = (height, width, channels)
         data = np.reshape(data, shape)
         data = np.flipud(data)
@@ -103,6 +116,8 @@ def _get_pfm_width_and_height_from_line(line: bytes) -> Tuple[int, int]:
         height = int(items[1])
     else:
         raise ValueError("Not a valid PFM header")
+    if width <= 0 or height <= 0:
+        raise ValueError("PFM width and height must be positive")
     return width, height
 
 
