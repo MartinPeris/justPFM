@@ -18,6 +18,7 @@ def test_failed_save_preserves_destination(tmp_path, monkeypatch, existing, fail
     original = b"existing image bytes"
     if existing:
         destination.write_bytes(original)
+        original_mode = S_IMODE(destination.stat().st_mode)
     data = np.arange(6, dtype=np.float32).reshape(2, 3)
 
     def fail_replace(*_args):
@@ -58,6 +59,7 @@ def test_failed_save_preserves_destination(tmp_path, monkeypatch, existing, fail
 
     if existing:
         assert destination.read_bytes() == original
+        assert S_IMODE(destination.stat().st_mode) == original_mode
         assert list(tmp_path.iterdir()) == [destination]
     else:
         assert not destination.exists()
@@ -125,3 +127,61 @@ def test_temporary_creation_failure_preserves_destination(tmp_path, monkeypatch)
         justpfm.write_pfm(destination, np.ones((2, 3), dtype=np.float32))
     assert destination.read_bytes() == b"old image"
     assert list(tmp_path.iterdir()) == [destination]
+
+
+def test_read_only_replacement_failure_cleans_temporary(tmp_path, monkeypatch):
+    """Emulate Windows rejecting read-only files during both replace and unlink."""
+    destination = tmp_path / "image.pfm"
+    destination.write_bytes(b"original image")
+    destination.chmod(0o400)
+    original_mode = S_IMODE(destination.stat().st_mode)
+    real_unlink = Path.unlink
+    failure = PermissionError("destination is read-only")
+    removed = []
+
+    def fail_replace(source, target):
+        assert S_IMODE(Path(source).stat().st_mode) == original_mode
+        assert target == destination
+        raise failure
+
+    def windows_unlink(path, *args, **kwargs):
+        if not path.stat().st_mode & 0o200:
+            raise PermissionError("cannot unlink a read-only temporary")
+        removed.append(path)
+        return real_unlink(path, *args, **kwargs)
+
+    monkeypatch.setattr(justpfm, "replace", fail_replace)
+    monkeypatch.setattr(Path, "unlink", windows_unlink)
+    try:
+        with pytest.raises(PermissionError) as raised:
+            justpfm.write_pfm(destination, np.ones((2, 3), dtype=np.float32))
+        assert raised.value is failure
+        assert len(removed) == 1
+        assert removed[0].parent == tmp_path
+        assert destination.read_bytes() == b"original image"
+        assert S_IMODE(destination.stat().st_mode) == original_mode
+        assert list(tmp_path.iterdir()) == [destination]
+    finally:
+        destination.chmod(0o600)
+
+
+def test_permissions_are_copied_after_close(tmp_path, monkeypatch):
+    """Only complete closed files receive the original file's permission bits."""
+    destination = tmp_path / "image.pfm"
+    destination.write_bytes(b"original image")
+    real_chmod = justpfm.chmod
+    real_temporary = justpfm.NamedTemporaryFile
+    temporary_files = []
+
+    def track_temporary(**kwargs):
+        temporary = real_temporary(**kwargs)
+        temporary_files.append(temporary)
+        return temporary
+
+    def checked_chmod(path, mode):
+        assert temporary_files[0].closed
+        return real_chmod(path, mode)
+
+    monkeypatch.setattr(justpfm, "NamedTemporaryFile", track_temporary)
+    monkeypatch.setattr(justpfm, "chmod", checked_chmod)
+    justpfm.write_pfm(destination, np.ones((2, 3), dtype=np.float32))
