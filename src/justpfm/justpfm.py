@@ -114,7 +114,8 @@ def read_pfm(file_name: Union[str, PathLike]) -> np.ndarray:
     top-first rows have negative strides. Use np.ascontiguousarray(result,
     dtype=np.float32) when native byte order and contiguous storage are needed.
     Samples are multiplied by the positive header scale magnitude, except scales
-    math.isclose to 1 (relative tolerance 1e-9). Nonfinite pixels are preserved.
+    math.isclose to 1 (relative tolerance 1e-9). Nonfinite pixels are accepted;
+    scaling follows NumPy float32 arithmetic.
     Invalid headers, dimensions, scales, or payload lengths raise ValueError;
     filesystem failures raise OSError. Payload size is checked before allocation.
     """
