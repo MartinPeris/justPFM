@@ -82,7 +82,23 @@ plus installed-wheel tests and coverage on Python 3.7–3.12. All checks are
 blocking, and the stable **Quality gate** job fails if any prerequisite fails or
 is cancelled. CI runs on pushes and pull requests without path filters.
 
-In GitHub's branch protection or ruleset settings for `main`, require the
-**Quality gate** status check before merging, preferably with the branch up to
-date. The workflow alone does not configure repository protection. At the time
-this harness was introduced, `main` had no branch protection.
+The proposed `main` protection requires the **Quality gate** check from the
+GitHub Actions app, with branches up to date before merging. It applies to
+repository administrators and disables force pushes and branch deletion. Once
+applied, local hook bypasses do not bypass this server-side check requirement.
+The live settings change is pending owner approval; a merged policy file alone
+does not enable protection.
+
+The intended settings are recorded in
+[.github/branch-protection.json](.github/branch-protection.json). An administrator
+can inspect the active settings with:
+
+```bash
+gh api repos/MartinPeris/justPFM/branches/main/protection
+```
+
+The JSON file documents the policy; changing it in a PR does not automatically
+change GitHub settings. Apply updates deliberately through branch protection
+settings or the API, preserving any additional protections added since this
+policy was recorded. Administrators can still change the protection policy;
+it is not an immutable security boundary.
