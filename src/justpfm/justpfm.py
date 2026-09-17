@@ -1,6 +1,6 @@
 """A small Python module to read/write PFM (Portable Float Map) images"""
 
-from math import isclose
+from math import isclose, isfinite
 from pathlib import Path
 from sys import byteorder
 from typing import Tuple
@@ -12,11 +12,11 @@ def write_pfm(file_name: Path, data: np.ndarray, scale: float = 1) -> None:
     """
     Writes the data into the file in PFM format
     """
-    if isclose(scale, 0.0):
-        raise ValueError("0 is not a valid value for scale")
+    if not isfinite(scale) or scale <= 0:
+        raise ValueError("scale must be positive and finite")
     if not _is_valid_shape(data):
         raise ValueError("data has invalid shape: " + str(data.shape))
-    if data.dtype != "float32":
+    if data.dtype.kind != "f" or data.dtype.itemsize != 4:
         raise ValueError("data must be float32: " + str(data.dtype))
 
     identifier = _get_pfm_identifier_from_data(data)
@@ -110,8 +110,8 @@ def _get_pfm_scale_and_endianness_from_line(line: bytes) -> Tuple[float, str]:
     """Parse the scale and endianness from the PFM header"""
     decoded_line = line.rstrip().decode("UTF-8")
     scale = float(decoded_line)
-    if isclose(scale, 0.0):
-        raise ValueError("0 is not a valid value for scale")
+    if not isfinite(scale) or scale == 0:
+        raise ValueError("PFM scale must be finite and nonzero")
     endianness = ""
     if scale < 0:
         endianness = "<"
