@@ -1,11 +1,12 @@
 # Branch protection
 
-The proposed `main` protection requires the **Quality gate** check from the
-GitHub Actions app, with branches up to date before merging. It applies to
-repository administrators and disables force pushes and branch deletion. Once
-applied, local hook bypasses do not bypass this server-side check requirement.
-The live settings change is pending owner approval; a merged policy file alone
-does not enable protection.
+`main` requires the **Quality gate** check from the GitHub Actions app, with
+branches up to date before merging. This applies to repository administrators;
+force pushes and branch deletion are disabled. Local hook bypasses do not
+bypass this server-side check requirement.
+
+The owner approved the full policy, which was applied and verified through the
+GitHub API on September 18, 2026 (Asia/Tokyo).
 
 The intended settings are recorded in
 [.github/branch-protection.json](.github/branch-protection.json). An administrator
