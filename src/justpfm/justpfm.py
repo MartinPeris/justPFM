@@ -49,20 +49,22 @@ def write_pfm(
     )
     try:
         with temporary as file:
-            try:
-                destination_stat = destination.lstat()
-            except FileNotFoundError:
-                pass
-            else:
-                if S_ISREG(destination_stat.st_mode):
-                    chmod(temporary.name, S_IMODE(destination_stat.st_mode))
             file.write(identifier.encode())
             file.write((f"\n{width} {height}\n").encode())
             file.write((f"{scale}\n").encode())
             flipped_data.tofile(file)
+        try:
+            destination_stat = destination.lstat()
+        except FileNotFoundError:
+            pass
+        else:
+            if S_ISREG(destination_stat.st_mode):
+                chmod(temporary.name, S_IMODE(destination_stat.st_mode))
         replace(temporary.name, destination)
     finally:
         try:
+            # Windows cannot unlink read-only files after a failed replacement.
+            chmod(temporary.name, 0o600)
             Path(temporary.name).unlink()
         except FileNotFoundError:
             pass
