@@ -1,9 +1,11 @@
 """A small Python module to read/write PFM (Portable Float Map) images"""
 
 from math import isclose, isfinite
-from os import fstat
+from os import chmod, fstat, replace
 from pathlib import Path
+from stat import S_IMODE, S_ISREG
 from sys import byteorder
+from tempfile import NamedTemporaryFile
 from typing import Tuple
 
 import numpy as np
@@ -11,7 +13,13 @@ import numpy as np
 
 def write_pfm(file_name: Path, data: np.ndarray, scale: float = 1) -> None:
     """
-    Writes the data into the file in PFM format
+    Write PFM data, atomically replacing the destination after closing the file.
+
+    A sibling temporary file is removed on failure, preserving any existing
+    destination. Existing regular file permissions are preserved; new files
+    have private permissions (0600 on POSIX). A destination symlink is replaced,
+    leaving its target intact. Other metadata, including ownership, is not copied.
+    Atomic replacement does not guarantee durability after a power failure.
     """
     if not isfinite(scale) or scale <= 0:
         raise ValueError("scale must be positive and finite")
@@ -25,11 +33,29 @@ def write_pfm(file_name: Path, data: np.ndarray, scale: float = 1) -> None:
     flipped_data = np.flipud(data)
     scale *= _get_pfm_endianness_from_data(data)
 
-    with open(file_name, "wb") as file:
-        file.write(identifier.encode())
-        file.write((f"\n{width} {height}\n").encode())
-        file.write((f"{scale}\n").encode())
-        flipped_data.tofile(file)
+    destination = Path(file_name)
+    temporary = NamedTemporaryFile(
+        mode="wb", dir=destination.parent, prefix=".justpfm-", delete=False
+    )
+    try:
+        with temporary as file:
+            try:
+                destination_stat = destination.lstat()
+            except FileNotFoundError:
+                pass
+            else:
+                if S_ISREG(destination_stat.st_mode):
+                    chmod(temporary.name, S_IMODE(destination_stat.st_mode))
+            file.write(identifier.encode())
+            file.write((f"\n{width} {height}\n").encode())
+            file.write((f"{scale}\n").encode())
+            flipped_data.tofile(file)
+        replace(temporary.name, destination)
+    finally:
+        try:
+            Path(temporary.name).unlink()
+        except FileNotFoundError:
+            pass
 
 
 def _get_pfm_identifier_from_data(data: np.ndarray) -> str:
