@@ -1,8 +1,10 @@
 """
 A small Python module to read/write PFM (Portable Float Map) images
 """
+
 import pathlib
-from setuptools import setup, find_packages
+
+from setuptools import find_packages, setup
 
 here = pathlib.Path(__file__).parent.resolve()
 

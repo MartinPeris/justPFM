@@ -22,3 +22,9 @@ read_data = justpfm.read_pfm(file_name="test.pfm")
 ```
 
 That's it!
+
+## Development
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and commit-hook installation.
+Run `pre-commit run --all-files` to execute the same lint, formatting, tests,
+100% statement/branch coverage, and packaging gates used by CI.
