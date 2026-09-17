@@ -1,19 +1,29 @@
 """A small Python module to read/write PFM (Portable Float Map) images"""
 
 from math import isclose, isfinite
-from os import chmod, fstat, replace
+from os import PathLike, chmod, fstat, replace
 from pathlib import Path
 from stat import S_IMODE, S_ISREG
 from sys import byteorder
 from tempfile import NamedTemporaryFile
-from typing import Tuple
+from typing import Tuple, Union
 
 import numpy as np
 
 
-def write_pfm(file_name: Path, data: np.ndarray, scale: float = 1) -> None:
+def write_pfm(
+    file_name: Union[str, PathLike], data: np.ndarray, scale: float = 1
+) -> None:
     """
-    Write PFM data, atomically replacing the destination after closing the file.
+    Write float32 pixels to a str or path-like destination; return None.
+
+    Accept positive (H, W), (H, W, 1), or (H, W, 3) shapes in either byte
+    order, including strided arrays and nonfinite pixels. Scale must be positive
+    and finite: it is recorded in the header without changing stored samples.
+    Reading applies that magnitude to samples. Invalid data/scale raise ValueError;
+    filesystem failures raise OSError. Rows are stored bottom-first.
+
+    Atomically replace the destination after closing the file.
 
     A sibling temporary file is removed on failure, preserving any existing
     destination. Existing regular file permissions are preserved; new files
@@ -95,8 +105,17 @@ def _get_pfm_endianness_from_data(data: np.ndarray) -> float:
     )
 
 
-def read_pfm(file_name: Path) -> np.ndarray:
-    """Read a file in PFM format into data"""
+def read_pfm(file_name: Union[str, PathLike]) -> np.ndarray:
+    """Read a str or path-like PFM file as an (H, W, C) float32 array.
+
+    C is 1 for grayscale or 3 for RGB. The dtype retains the file byte order;
+    top-first rows have negative strides. Use np.ascontiguousarray(result,
+    dtype=np.float32) when native byte order and contiguous storage are needed.
+    Samples are multiplied by the positive header scale magnitude, except scales
+    math.isclose to 1 (relative tolerance 1e-9). Nonfinite pixels are preserved.
+    Invalid headers, dimensions, scales, or payload lengths raise ValueError;
+    filesystem failures raise OSError. Payload size is checked before allocation.
+    """
     with open(file_name, "rb") as file:
         channels = _get_pfm_channels_from_line(file.readline())
         width, height = _get_pfm_width_and_height_from_line(file.readline())
