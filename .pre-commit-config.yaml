@@ -1,0 +1,13 @@
+minimum_pre_commit_version: '3.5.0'
+repos:
+  - repo: local
+    hooks:
+      - id: quality
+        name: Full quality harness (lint, tests, coverage, packaging)
+        entry: tox run
+        language: python
+        language_version: python3.12
+        additional_dependencies: [tox==4.11.4, virtualenv==20.26.6]
+        pass_filenames: false
+        always_run: true
+        require_serial: true

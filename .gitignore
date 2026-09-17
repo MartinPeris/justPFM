@@ -45,3 +45,11 @@ __pycache__
 dist
 src/justpfm.egg-info
 
+
+# Quality harness
+.coverage.*
+coverage.xml
+htmlcov/
+.tox/
+.ruff_cache/
+build/

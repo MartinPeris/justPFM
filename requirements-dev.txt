@@ -1,0 +1,5 @@
+# Use Python 3.12 for the full developer harness.
+pre-commit==3.5.0
+tox==4.11.4
+# Keep support for creating Python 3.7 test environments.
+virtualenv==20.26.6

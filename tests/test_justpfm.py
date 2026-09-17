@@ -1,9 +1,11 @@
 """Unit tests for justpfm"""
-from pathlib import Path
+
+from sys import byteorder
 
 import numpy as np
 import pytest
-from src.justpfm.justpfm import (
+
+from justpfm.justpfm import (
     _get_pfm_channels_from_line,
     _get_pfm_endianness_from_data,
     _get_pfm_identifier_from_data,
@@ -15,7 +17,6 @@ from src.justpfm.justpfm import (
     write_pfm,
 )
 
-PFM_TEST_FILE_PATH: Path = Path("test.pfm")
 
 def test_is_valid_shape(get_ones_matrix):
     """Test that a 2D matrix has valid shape"""
@@ -42,16 +43,16 @@ def test_invalid_shape_2_channel(get_ones_matrix_2_channel):
     assert _is_valid_shape(get_ones_matrix_2_channel) is False
 
 
-def test_write_pfm_scale_zero(get_ones_matrix):
+def test_write_pfm_scale_zero(tmp_path, get_ones_matrix):
     """Test that write_pfm raises an exception when scale is 0"""
     with pytest.raises(ValueError):
-        write_pfm(PFM_TEST_FILE_PATH, data=get_ones_matrix, scale=0)
+        write_pfm((tmp_path / "test.pfm"), data=get_ones_matrix, scale=0)
 
 
-def test_write_pfm_invalid_shape(get_ones_matrix_2_channel):
+def test_write_pfm_invalid_shape(tmp_path, get_ones_matrix_2_channel):
     """Test that write_pfm raises an exception when invalid shape"""
     with pytest.raises(ValueError):
-        write_pfm(PFM_TEST_FILE_PATH, get_ones_matrix_2_channel)
+        write_pfm((tmp_path / "test.pfm"), get_ones_matrix_2_channel)
 
 
 def test_get_pfm_identifier_mono(get_ones_matrix):
@@ -76,84 +77,83 @@ def test_get_pfm_width_and_height():
     assert width == 5 and height == 6
 
 
-def test_get_pfm_endianness_is_little_endian_by_default():
-    """Test that the default system is little endian"""
+def test_get_pfm_endianness_matches_host():
+    """Test that native arrays use the host byte order"""
     data = np.ones((6, 5, 3))
-    assert _get_pfm_endianness_from_data(data) == -1
+    assert _get_pfm_endianness_from_data(data) == (-1 if byteorder == "little" else 1)
 
 
 def test_get_pfm_channels_from_identifier_mono():
     """Test that the Pf identifier returns 1 channel"""
-    assert _get_pfm_channels_from_line(("Pf").encode()) == 1
+    assert _get_pfm_channels_from_line(b"Pf") == 1
 
 
 def test_get_pfm_channels_from_identifier_color():
     """Test that the PF identifier returns 3 channels"""
-    assert _get_pfm_channels_from_line(("PF").encode()) == 3
+    assert _get_pfm_channels_from_line(b"PF") == 3
 
 
 def test_get_pfm_channels_from_identifier_invalid():
     """Test that an invalid Pf identifier raises exception"""
     with pytest.raises(ValueError):
-        _get_pfm_channels_from_line(("").encode())
+        _get_pfm_channels_from_line(b"")
 
 
 def test_get_pfm_width_and_height_from_line_valid():
     """Test that a valid PFM header can be parsed into width and height"""
     width = 6
     height = 5
-    assert _get_pfm_width_and_height_from_line(
-        (f"{width} {height}\n").encode()
-    ) == (width, height)
+    assert _get_pfm_width_and_height_from_line((f"{width} {height}\n").encode()) == (
+        width,
+        height,
+    )
 
 
 def test_get_pfm_width_and_height_from_line_invalid():
     """Test that an invalid PFM header trows an exception"""
     with pytest.raises(ValueError):
-        _get_pfm_width_and_height_from_line(("1").encode())
+        _get_pfm_width_and_height_from_line(b"1")
 
 
 def test_get_pfm_width_and_height_from_line_invalid_text():
     """Test that an invalid PFM header trows an exception"""
     with pytest.raises(ValueError):
-        _get_pfm_width_and_height_from_line(("blah blah").encode())
+        _get_pfm_width_and_height_from_line(b"blah blah")
 
 
 def test_get_pfm_scale_and_endianness_from_line_positive():
     """Test that a valid scale big endian can be parsed from the PFM header"""
-    assert _get_pfm_scale_and_endianness_from_line(("1.0").encode()) == (1.0, ">")
+    assert _get_pfm_scale_and_endianness_from_line(b"1.0") == (1.0, ">")
 
 
 def test_get_pfm_scale_and_endianness_from_line_negative():
     """Test that a valid scale little endian can be parsed from the PFM header"""
-    assert _get_pfm_scale_and_endianness_from_line(("-1.0").encode()) == (1.0, "<")
+    assert _get_pfm_scale_and_endianness_from_line(b"-1.0") == (1.0, "<")
 
 
 def test_get_pfm_scale_and_endianness_from_line_invalid():
     """Test that an invalid scale raises an exception"""
     with pytest.raises(ValueError):
-        _get_pfm_scale_and_endianness_from_line(("0.0").encode())
+        _get_pfm_scale_and_endianness_from_line(b"0.0")
 
 
-def test_write_pfm_invalid_type():
+def test_write_pfm_invalid_type(tmp_path):
     """Test that an invalid type matrix rises an exception"""
     with pytest.raises(ValueError):
-        write_pfm(PFM_TEST_FILE_PATH, np.ones((5, 5), dtype="float64"))
+        write_pfm((tmp_path / "test.pfm"), np.ones((5, 5), dtype="float64"))
 
 
-def test_write_and_read_pfm(get_ones_matrix_1_channel):
+def test_write_and_read_pfm(tmp_path, get_ones_matrix_1_channel):
     """Test write pfm"""
-    write_pfm(PFM_TEST_FILE_PATH, get_ones_matrix_1_channel, 1.0)
-    data = read_pfm(PFM_TEST_FILE_PATH)
+    write_pfm((tmp_path / "test.pfm"), get_ones_matrix_1_channel, 1.0)
+    data = read_pfm(tmp_path / "test.pfm")
     data_comparison = data == get_ones_matrix_1_channel
-    PFM_TEST_FILE_PATH.unlink(missing_ok=True)
     assert data_comparison.all()
 
 
-def test_write_and_read_pfm_scale(get_ones_matrix_1_channel):
+def test_write_and_read_pfm_scale(tmp_path, get_ones_matrix_1_channel):
     """Test write pfm"""
-    write_pfm(PFM_TEST_FILE_PATH, get_ones_matrix_1_channel, 0.5)
-    data = read_pfm(PFM_TEST_FILE_PATH)
+    write_pfm((tmp_path / "test.pfm"), get_ones_matrix_1_channel, 0.5)
+    data = read_pfm(tmp_path / "test.pfm")
     data_comparison = data == get_ones_matrix_1_channel * 0.5
-    PFM_TEST_FILE_PATH.unlink(missing_ok=True)
     assert data_comparison.all()
