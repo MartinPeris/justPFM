@@ -1,0 +1,28 @@
+name: Netpbm interoperability
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  netpbm:
+    name: Netpbm reader and writer
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install independent Netpbm implementation
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y netpbm
+          dpkg-query -W netpbm
+      - run: python -m pip install -r requirements-dev.txt
+      - name: Check fixtures and read justPFM output with Netpbm
+        run: tox run -e interop
