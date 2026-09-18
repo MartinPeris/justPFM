@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.2.1 — 2026-09-18
+
+- Consolidate package metadata, version, dependencies, extras, and package-data
+  settings in `pyproject.toml`. Remove the redundant `setup.py`, `setup.cfg`, and
+  runtime `requirements.txt`; use `python -m pip install .` for a checkout and
+  `python -m build` for distributions.
+- Shorten the README to a quick start and API overview. Preserve detailed
+  contracts in `API.md`, include it in source archives, and make README
+  documentation links work on PyPI.
+- Library behavior, dependencies, extras, and Python 3.7–3.14 support are unchanged.
+  Performance badges retain their recorded 1.2.0 baseline.
+
 ## 1.2.0.post1 — 2026-09-18
 
 - Refresh the packaged README performance badges with the recorded 1.2.0
