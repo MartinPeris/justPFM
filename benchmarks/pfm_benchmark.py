@@ -239,7 +239,7 @@ def main():
                             json.dumps(case),
                         ]
                         completed = subprocess.run(
-                            command, check=True, capture_output=True, text=True
+                            command, check=True, stdout=subprocess.PIPE, text=True
                         )
                         measured = json.loads(completed.stdout)
                         report["cases"].append(measured)
