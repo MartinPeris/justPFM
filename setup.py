@@ -39,7 +39,7 @@ setup(
     install_requires=["numpy"],
     extras_require={
         "dev": ["check-manifest"],
-        "test": ["pytest", "pytest-cov"],
+        "test": ["pytest", "pytest-cov", "hypothesis==6.79.4"],
     },
     project_urls={
         "Bug Reports": "https://github.com/MartinPeris/justPFM/issues",
