@@ -97,3 +97,19 @@ In GitHub's branch protection or ruleset settings for `main`, require the
 **Quality gate** status check before merging, preferably with the branch up to
 date. The workflow alone does not configure repository protection. At the time
 this harness was introduced, `main` had no branch protection.
+
+
+## Release validation
+
+The `Release` workflow calls the same `Quality` workflow, including all Python
+compatibility tests, for the triggering commit. Its distribution job depends
+on the complete quality workflow succeeding. Both checks and builds explicitly
+check out `github.sha`, so a passing check on a different commit cannot authorize
+publication. A failure or cancellation prevents building and publishing.
+
+Workflow pull requests and manual runs perform a dry run: quality checks,
+source/wheel builds, strict metadata validation, and artifact upload. The PyPI
+publish step runs only on a `release: published` event. Use the manual `Release`
+workflow on a feature branch to exercise the path without publishing a package.
+Release changes should be merged before creating the release tag; publication
+uses the workflow from that release commit.
