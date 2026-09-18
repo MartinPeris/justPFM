@@ -1,4 +1,4 @@
-include CHANGELOG.md CONTRIBUTING.md requirements-dev.txt tox.ini SUPPORT.md
+include API.md CHANGELOG.md CONTRIBUTING.md requirements-dev.txt tox.ini SUPPORT.md
 recursive-include tests *.py
 recursive-include tests/fixtures/netpbm *.pfm *.pgm *.ppm *.md
 recursive-include interop *.py
