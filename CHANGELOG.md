@@ -1,11 +1,21 @@
 # Changelog
 
-## Unreleased
+## 1.2.0 — release candidate
 
 - Add `encode_pfm` and `decode_pfm` for complete PFM bytes, without filesystem
   access or additional dependencies. Share validation and scale semantics with
   the file APIs; decoded arrays are always writable and independent of the input.
 - Keep optimized filesystem I/O and atomic replacement intact.
+- Add README badges for CI, coverage requirements, package information, and
+  recorded benchmark results.
+
+### Upgrade notes
+
+- This is an additive release; existing file APIs remain compatible. Python
+  3.7–3.14 and NumPy >=1.21 remain supported.
+- In-memory encoding returns a complete `bytes` object. Decoding accepts `bytes`
+  or `bytearray`, supports `max_pixels`, and allocates an independent pixel array.
+  Use the file APIs when avoiding a complete in-memory PFM payload is important.
 
 ## 1.1.0 — 2026-09-18
 
