@@ -2,6 +2,59 @@
 requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[project]
+name = "justpfm"
+version = "1.2.0.post1"
+description = "Read and write PFM files"
+readme = "README.md"
+requires-python = ">=3.7, <4"
+authors = [{name = "Martin Peris Martorell", email = "cosmoperis@gmail.com"}]
+keywords = ["pfm", "portable", "float", "map"]
+dependencies = ["numpy>=1.21"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Image Processing",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3 :: Only",
+]
+
+[project.optional-dependencies]
+dev = ["check-manifest"]
+test = [
+    "pytest",
+    "pytest-cov",
+    "hypothesis==6.79.4; python_version < \"3.10\"",
+    "hypothesis==6.168.0; python_version >= \"3.10\"",
+]
+
+[project.urls]
+Homepage = "https://github.com/MartinPeris/justPFM"
+"Bug Reports" = "https://github.com/MartinPeris/justPFM/issues"
+Source = "https://github.com/MartinPeris/justPFM"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+include-package-data = false
+# Compatible with setuptools versions that still support Python 3.7.
+license-files = ["LICENSE"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = false
+
+[tool.setuptools.package-data]
+justpfm = ["py.typed"]
+
 [tool.ruff]
 target-version = "py37"
 line-length = 88

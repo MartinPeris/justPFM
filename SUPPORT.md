@@ -19,7 +19,7 @@ The developer harness runs under Python 3.12, independently of the target test
 interpreter. Python 3.7–3.9 use compatible pinned pytest, pytest-cov, coverage,
 and Hypothesis releases; Python 3.10–3.14 use newer pins supporting current
 interpreters. Both tracks run the same tests and enforce the same coverage gate.
-The Hypothesis pins in `setup.py` and `tox.ini` must stay aligned.
+The Hypothesis pins in `pyproject.toml` and `tox.ini` must stay aligned.
 
 Virtualenv remains at patched 20.36.1 to retain legacy target creation. Python
 3.7 uses explicitly downloaded compatible seed packages as documented in
