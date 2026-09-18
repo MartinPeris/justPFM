@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.0.post1 — 2026-09-18
+
+- Refresh the packaged README performance badges with the recorded 1.2.0
+  baseline: 7.100 ms read and 16.510 ms write for the documented 2048² RGB
+  workload. Include raw measurements, reproduction details, and release
+  maintenance guidance.
+- Documentation-only post-release; library behavior, dependencies, and Python
+  support are unchanged from 1.2.0.
+
 ## 1.2.0 — 2026-09-18
 
 - Add `encode_pfm` and `decode_pfm` for complete PFM bytes, without filesystem
