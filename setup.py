@@ -30,6 +30,10 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
         "Programming Language :: Python :: 3 :: Only",
     ],
     keywords="pfm, portable, float, map",
@@ -40,7 +44,12 @@ setup(
     install_requires=["numpy>=1.21"],
     extras_require={
         "dev": ["check-manifest"],
-        "test": ["pytest", "pytest-cov", "hypothesis==6.79.4"],
+        "test": [
+            "pytest",
+            "pytest-cov",
+            'hypothesis==6.79.4; python_version < "3.10"',
+            'hypothesis==6.168.0; python_version >= "3.10"',
+        ],
     },
     project_urls={
         "Bug Reports": "https://github.com/MartinPeris/justPFM/issues",

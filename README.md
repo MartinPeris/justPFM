@@ -4,6 +4,9 @@ A small NumPy-based Python module to read and write Portable Float Map images.
 
 ## Install
 
+Supported Python versions: **3.7–3.14**. See [SUPPORT.md](SUPPORT.md) for the
+compatibility policy and interpreter-specific test tooling.
+
 ```bash
 pip install justpfm
 ```
@@ -108,6 +111,7 @@ Property tests vary dimensions, pixel values, array layout, byte order, scale,
 and malformed payload sizes. They also check the reader against independently
 encoded binary fixtures. Local and CI runs use the same deterministic Hypothesis
 profile: 60 examples per property, no example database, and no timing deadline.
-Health checks remain enabled. Hypothesis is pinned to `6.79.4` in the test extra
-and tox to retain Python 3.7 compatibility; its [release metadata](https://pypi.org/project/hypothesis/6.79.4/)
-declares Python 3.7 or newer.
+Health checks remain enabled. Hypothesis uses `6.79.4` on Python 3.7–3.9 and
+`6.168.0` on Python 3.10–3.14, with matching pins in the test extra and tox.
+Each interpreter runs the same properties; deterministic examples are repeatable
+within its pinned toolchain, not guaranteed identical across Hypothesis versions.
