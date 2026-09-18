@@ -16,13 +16,25 @@ def test_bulk_write_preserves_exact_bits(
     tmp_path, monkeypatch, shape, endian, layout, budget
 ):
     """Preserve NaN payloads, signed zero, endian and row order even at block edges."""
-    bits = np.resize(
-        np.array(
-            [0, 0x80000000, 0x7FC00001, 0x7F800000, 0xFF800000, 0x3F800000],
-            dtype=endian + "u4",
-        ),
-        np.prod(shape),
-    ).reshape(shape)
+    bits = (
+        np.resize(
+            np.array(
+                [
+                    0,
+                    0x80000000,
+                    0x7FC00001,
+                    0x7F800001,
+                    0x7F800000,
+                    0xFF800000,
+                    0x3F800000,
+                ],
+                dtype=endian + "u4",
+            ),
+            np.prod(shape),
+        )
+        .astype(endian + "u4")
+        .reshape(shape)
+    )
     data = bits.view(endian + "f4")
     if layout == "fortran":
         data = np.asfortranarray(data)
@@ -36,6 +48,7 @@ def test_bulk_write_preserves_exact_bits(
         data = backing[:, ::2]
     elif layout == "broadcast":
         data = np.broadcast_to(data[:1], shape)
+    data.flags.writeable = False
     before = data.tobytes()
     monkeypatch.setattr(justpfm, "_WRITE_BUFFER_BYTES", budget)
     path = tmp_path / "image.pfm"
