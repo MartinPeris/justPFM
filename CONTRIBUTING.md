@@ -92,6 +92,17 @@ See [SUPPORT.md](SUPPORT.md) for the compatibility policy. Test-tool pins in
 Python 3.10–3.14. Both tracks run the same tests and 100% coverage gate. Update
 Hypothesis pins in the test extra together with tox so installation paths agree.
 
+## Property tests
+
+Property tests vary dimensions, pixel values, array layout, byte order, scale,
+and malformed payload sizes. They also check the reader against independently
+encoded binary fixtures. Local and CI runs use the same deterministic Hypothesis
+profile: 60 examples per property, no example database, and no timing deadline.
+Health checks remain enabled. Hypothesis uses `6.79.4` on Python 3.7–3.9 and
+`6.168.0` on Python 3.10–3.14, with matching pins in the test extra and tox.
+Each interpreter runs the same properties; deterministic examples are repeatable
+within its pinned toolchain, not guaranteed identical across Hypothesis versions.
+
 ## CI and merge protection
 
 The `Quality` workflow runs the identical pre-commit command on Python 3.12,

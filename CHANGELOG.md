@@ -69,7 +69,7 @@
   return `(H, W, C)` arrays with top-first rows, generally with negative row
   strides, and multiply samples by the header scale magnitude. Use scale 1 for
   neutral intensity interchange with Netpbm, whose nonunit-scale convention
-  differs. See [README.md](README.md#api-contract) for the complete contract.
+  differs. See [API.md](API.md) for the complete contract.
 
 ## 1.0.0 — 2022-05-30
 
