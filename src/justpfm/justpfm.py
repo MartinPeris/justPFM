@@ -1,20 +1,25 @@
 """A small Python module to read/write PFM (Portable Float Map) images"""
 
+from __future__ import annotations
+
 from math import isclose, isfinite
 from os import PathLike, chmod, fstat, replace
 from pathlib import Path
 from stat import S_IMODE, S_ISREG
 from sys import byteorder
 from tempfile import NamedTemporaryFile
-from typing import BinaryIO, Optional, Tuple, Union
+from typing import Any, BinaryIO, Optional, Tuple, Union
 
 import numpy as np
+import numpy.typing as npt
 
 _MAX_HEADER_LINE_BYTES = 4096
 
 
 def write_pfm(
-    file_name: Union[str, PathLike], data: np.ndarray, scale: float = 1
+    file_name: Union[str, PathLike[str]],
+    data: npt.NDArray[np.float32],
+    scale: float = 1,
 ) -> None:
     """
     Write float32 pixels to a str or path-like destination; return None.
@@ -72,7 +77,7 @@ def write_pfm(
             pass
 
 
-def _get_pfm_identifier_from_data(data: np.ndarray) -> str:
+def _get_pfm_identifier_from_data(data: npt.NDArray[Any]) -> str:
     """Get the pfm identifier depending on the number of channels on the
     data object
     """
@@ -82,7 +87,7 @@ def _get_pfm_identifier_from_data(data: np.ndarray) -> str:
     return identifier
 
 
-def _is_valid_shape(data: np.ndarray) -> bool:
+def _is_valid_shape(data: npt.NDArray[Any]) -> bool:
     """Return true if the shape of the data is valid"""
     if 0 in data.shape:
         return False
@@ -95,13 +100,13 @@ def _is_valid_shape(data: np.ndarray) -> bool:
     return False
 
 
-def _get_pfm_width_and_height_from_data(data: np.ndarray) -> Tuple[int, int]:
+def _get_pfm_width_and_height_from_data(data: npt.NDArray[Any]) -> Tuple[int, int]:
     """Return the width and height of the matrix in the proper order"""
     height, width = data.shape[:2]
     return width, height
 
 
-def _get_pfm_endianness_from_data(data: np.ndarray) -> float:
+def _get_pfm_endianness_from_data(data: npt.NDArray[Any]) -> float:
     """Return 1 if bigendian, -1 if little endian data"""
     endianness = data.dtype.byteorder
     return (
@@ -110,8 +115,8 @@ def _get_pfm_endianness_from_data(data: np.ndarray) -> float:
 
 
 def read_pfm(
-    file_name: Union[str, PathLike], *, max_pixels: Optional[int] = None
-) -> np.ndarray:
+    file_name: Union[str, PathLike[str]], *, max_pixels: Optional[int] = None
+) -> npt.NDArray[np.float32]:
     """Read a str or path-like PFM file as an (H, W, C) float32 array.
 
     C is 1 for grayscale or 3 for RGB. The dtype retains the file byte order;
@@ -148,7 +153,9 @@ def read_pfm(
                 f"Invalid PFM payload size: expected {expected_bytes} bytes, "
                 f"got {remaining_bytes}"
             )
-        data = np.fromfile(file, endianness + "f", count=sample_count)
+        data: npt.NDArray[np.float32] = np.fromfile(
+            file, endianness + "f", count=sample_count
+        )
         if data.size != sample_count:
             raise ValueError("PFM payload was truncated while reading")
         shape = (height, width, channels)

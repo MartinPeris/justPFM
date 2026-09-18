@@ -35,8 +35,9 @@ setup(
     keywords="pfm, portable, float, map",
     package_dir={"": "src"},
     packages=find_packages(where="src"),
+    package_data={"justpfm": ["py.typed"]},
     python_requires=">=3.7, <4",
-    install_requires=["numpy"],
+    install_requires=["numpy>=1.21"],
     extras_require={
         "dev": ["check-manifest"],
         "test": ["pytest", "pytest-cov", "hypothesis==6.79.4"],
