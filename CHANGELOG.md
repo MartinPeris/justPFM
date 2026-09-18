@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Add `encode_pfm` and `decode_pfm` for complete PFM bytes, without filesystem
+  access or additional dependencies. Share validation and scale semantics with
+  the file APIs; decoded arrays are always writable and independent of the input.
+- Keep optimized filesystem I/O and atomic replacement intact.
+
 ## 1.1.0 — 2026-09-18
 
 ### Performance

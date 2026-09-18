@@ -3,10 +3,12 @@
 import numpy as np
 import pytest
 
-from justpfm import justpfm, read_pfm, write_pfm
+from justpfm import decode_pfm, encode_pfm, justpfm, read_pfm, write_pfm
 
 
 def test_public_exports_preserve_legacy_imports():
+    assert decode_pfm is justpfm.decode_pfm
+    assert encode_pfm is justpfm.encode_pfm
     assert read_pfm is justpfm.read_pfm
     assert write_pfm is justpfm.write_pfm
 

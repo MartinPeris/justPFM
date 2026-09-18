@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from io import BytesIO
 from math import isclose, isfinite
 from os import PathLike, chmod, fstat, replace
 from pathlib import Path
@@ -39,17 +40,8 @@ def write_pfm(
     leaving its target intact. Other metadata, including ownership, is not copied.
     Atomic replacement does not guarantee durability after a power failure.
     """
-    if not isfinite(scale) or scale <= 0:
-        raise ValueError("scale must be positive and finite")
-    if not _is_valid_shape(data):
-        raise ValueError("data has invalid shape: " + str(data.shape))
-    if data.dtype.kind != "f" or data.dtype.itemsize != 4:
-        raise ValueError("data must be float32: " + str(data.dtype))
-
-    identifier = _get_pfm_identifier_from_data(data)
-    width, height = _get_pfm_width_and_height_from_data(data)
+    header = _encode_pfm_header(data, scale)
     flipped_data = np.flipud(data)
-    scale *= _get_pfm_endianness_from_data(data)
 
     destination = Path(file_name)
     temporary = NamedTemporaryFile(
@@ -57,9 +49,7 @@ def write_pfm(
     )
     try:
         with temporary as file:
-            file.write(identifier.encode())
-            file.write((f"\n{width} {height}\n").encode())
-            file.write((f"{scale}\n").encode())
+            file.write(header)
             _write_pfm_payload(file.file, flipped_data)
         try:
             destination_stat = destination.lstat()
@@ -76,6 +66,34 @@ def write_pfm(
             Path(temporary.name).unlink()
         except FileNotFoundError:
             pass
+
+
+def encode_pfm(data: npt.NDArray[np.float32], scale: float = 1) -> bytes:
+    """Encode an image to complete PFM bytes without accessing the filesystem.
+
+    Accept the same shapes, float32 byte orders, layouts and scale as write_pfm.
+    Scale is recorded in the header without multiplying pixels. Input data is
+    unchanged. The returned bytes own the complete encoded image; constructing
+    them also temporarily allocates a full serialized pixel payload.
+    """
+    header = _encode_pfm_header(data, scale)
+    return header + np.flipud(data).tobytes(order="C")
+
+
+def _encode_pfm_header(data: npt.NDArray[np.float32], scale: float) -> bytes:
+    """Validate writer inputs and format a shared header for file and byte APIs."""
+    if not isfinite(scale) or scale <= 0:
+        raise ValueError("scale must be positive and finite")
+    if not _is_valid_shape(data):
+        raise ValueError("data has invalid shape: " + str(data.shape))
+    if data.dtype.kind != "f" or data.dtype.itemsize != 4:
+        raise ValueError("data must be float32: " + str(data.dtype))
+
+    identifier = _get_pfm_identifier_from_data(data)
+    width, height = _get_pfm_width_and_height_from_data(data)
+    scale *= _get_pfm_endianness_from_data(data)
+
+    return f"{identifier}\n{width} {height}\n{scale}\n".encode()
 
 
 def _write_pfm_payload(file: IO[bytes], data: npt.NDArray[np.float32]) -> None:
@@ -148,38 +166,88 @@ def read_pfm(
     supply a positive built-in int (not bool), or None for no pixel-count limit.
     Invalid limits and images exceeding the limit raise ValueError.
     """
-    if max_pixels is not None:
-        if isinstance(max_pixels, bool) or not isinstance(max_pixels, int):
-            raise ValueError("max_pixels must be a positive integer or None")
-        if max_pixels <= 0:
-            raise ValueError("max_pixels must be a positive integer or None")
+    _validate_max_pixels(max_pixels)
     with open(file_name, "rb") as file:
-        channels = _get_pfm_channels_from_line(_read_pfm_header_line(file))
-        width, height = _get_pfm_width_and_height_from_line(_read_pfm_header_line(file))
-        if max_pixels is not None and width * height > max_pixels:
-            raise ValueError(f"PFM image exceeds max_pixels limit of {max_pixels}")
-        scale, endianness = _get_pfm_scale_and_endianness_from_line(
-            _read_pfm_header_line(file)
-        )
-        sample_count = width * height * channels
-        expected_bytes = sample_count * 4
-        remaining_bytes = fstat(file.fileno()).st_size - file.tell()
-        if remaining_bytes != expected_bytes:
-            raise ValueError(
-                f"Invalid PFM payload size: expected {expected_bytes} bytes, "
-                f"got {remaining_bytes}"
-            )
+        shape, scale, endianness = _read_pfm_header(file, max_pixels)
+        sample_count = shape[0] * shape[1] * shape[2]
+        _validate_payload_size(fstat(file.fileno()).st_size - file.tell(), sample_count)
         data: npt.NDArray[np.float32] = np.fromfile(
             file, endianness + "f", count=sample_count
         )
         if data.size != sample_count:
             raise ValueError("PFM payload was truncated while reading")
-        shape = (height, width, channels)
-        data = np.reshape(data, shape)
-        data = np.flipud(data)
-        if not isclose(scale, 1.0):
-            data *= scale
-        return data
+        return _finish_pfm_read(data, shape, scale)
+
+
+def decode_pfm(
+    payload: Union[bytes, bytearray], *, max_pixels: Optional[int] = None
+) -> npt.NDArray[np.float32]:
+    """Decode complete PFM bytes into independent, writable (H, W, C) pixels.
+
+    Accept bytes or bytearray; other types raise TypeError. Apply the same header,
+    payload, scale and pixel-limit validation as read_pfm before pixel allocation.
+    Preserve file byte order and return top-first rows with negative row strides.
+    Always copy pixels, including for scale 1: the result never aliases payload.
+    The caller retains ownership of payload and must not mutate it during decoding.
+    The encoded input and decoded pixel allocation coexist in memory.
+    """
+    _validate_max_pixels(max_pixels)
+    if not isinstance(payload, (bytes, bytearray)):
+        raise TypeError("payload must be bytes or bytearray")
+    # Three bounded header lines plus one byte to detect an oversized last line.
+    # Do not copy the full encoded image merely to parse its header.
+    with BytesIO(payload[: 3 * _MAX_HEADER_LINE_BYTES + 1]) as header:
+        shape, scale, endianness = _read_pfm_header(header, max_pixels)
+        offset = header.tell()
+    sample_count = shape[0] * shape[1] * shape[2]
+    _validate_payload_size(len(payload) - offset, sample_count)
+    data: npt.NDArray[np.float32] = np.frombuffer(
+        payload, dtype=endianness + "f", count=sample_count, offset=offset
+    ).copy()
+    return _finish_pfm_read(data, shape, scale)
+
+
+def _validate_max_pixels(max_pixels: Optional[int]) -> None:
+    """Reject invalid limits before opening files or parsing bytes."""
+    if max_pixels is not None:
+        if isinstance(max_pixels, bool) or not isinstance(max_pixels, int):
+            raise ValueError("max_pixels must be a positive integer or None")
+        if max_pixels <= 0:
+            raise ValueError("max_pixels must be a positive integer or None")
+
+
+def _read_pfm_header(
+    file: BinaryIO, max_pixels: Optional[int]
+) -> Tuple[Tuple[int, int, int], float, str]:
+    """Read bounded header lines and enforce the pixel limit before raster access."""
+    channels = _get_pfm_channels_from_line(_read_pfm_header_line(file))
+    width, height = _get_pfm_width_and_height_from_line(_read_pfm_header_line(file))
+    if max_pixels is not None and width * height > max_pixels:
+        raise ValueError(f"PFM image exceeds max_pixels limit of {max_pixels}")
+    scale, endianness = _get_pfm_scale_and_endianness_from_line(
+        _read_pfm_header_line(file)
+    )
+    return (height, width, channels), scale, endianness
+
+
+def _validate_payload_size(remaining_bytes: int, sample_count: int) -> None:
+    """Reject missing or extra pixels before allocating a decoded array."""
+    expected_bytes = sample_count * 4
+    if remaining_bytes != expected_bytes:
+        raise ValueError(
+            f"Invalid PFM payload size: expected {expected_bytes} bytes, "
+            f"got {remaining_bytes}"
+        )
+
+
+def _finish_pfm_read(
+    data: npt.NDArray[np.float32], shape: Tuple[int, int, int], scale: float
+) -> npt.NDArray[np.float32]:
+    """Restore row order and apply scale once to independently owned pixels."""
+    data = np.flipud(np.reshape(data, shape))
+    if not isclose(scale, 1.0):
+        data *= scale
+    return data
 
 
 def _read_pfm_header_line(file: BinaryIO) -> bytes:
