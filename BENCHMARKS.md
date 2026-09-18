@@ -110,3 +110,77 @@ written into the header, so write-time differences between scale 1 and 2
 should not be interpreted as pixel-scaling costs. Repeat full runs on the
 intended hardware and storage, and investigate durable or cold I/O separately
 before choosing an optimization. This baseline makes no throughput promise.
+
+## Bulk writer comparison
+
+The writer now copies noncontiguous, bottom-first pixels into a reusable row
+buffer before bulk serialization. Its pixel scratch allocation is bounded by
+**the larger of 8 MiB and one row**, and smaller images allocate only their
+payload size. An unusually wide row can exceed 8 MiB. Arrays already contiguous
+in file order (for example, an unscaled read result written back) go directly to
+`tofile` without a pixel buffer. Input pixels and byte order remain unchanged.
+
+A full contiguous copy was also explored: it removed the serialization bottleneck
+but required an extra full-image allocation (48 MiB for 2048² RGB). The reusable
+buffer retains substantial speed gains with bounded scratch space. This choice
+does not claim that 8 MiB is optimal on every machine; filesystem cache, image
+layout and size affect timings. Atomic replacement and error cleanup are retained.
+
+### Measured before and after
+
+The [before artifact](benchmarks/results/bulk-write-before-2026-09-18.json) measures
+library revision `16d301f1814ef6bb17896265025d76c2a5f41c81`; the
+[after artifact](benchmarks/results/bulk-write-after-2026-09-18.json) measures
+`5b6dc39f97f2b68b780f51ecb96137e8e6cbaaa0`. Both use the benchmark driver from the
+latter revision, seven samples, two warmups, and identical 32², 1024² and 2048²
+cases. The baseline worktree's modified benchmark driver is recorded in its
+`git_status`; its installed library is unmodified. Each artifact includes the
+installed library's source hash.
+
+These are one sequential before/after run on the same Linux host described above:
+AMD Ryzen 9 7940HS, Python 3.12.3, NumPy 2.5.3, native little-endian float32,
+`/tmp` on ext4/NVMe. The warm/cache-eligible and non-durable-write limitations
+above still apply; timings are not portable guarantees. Correctness checks are
+outside the timed region. Table values are scale-1 **median milliseconds**;
+the raw results include grayscale, scale 2, every timing sample, and reads.
+
+| Image | Input | Before ms | After ms | Speedup | After traced peak MiB |
+| --- | --- | --- | --- | --- | --- |
+| 32² RGB | contiguous | 0.276 | 0.181 | 1.53× | 0.018 |
+| 32² RGB | strided | 0.254 | 0.235 | 1.08× | 0.018 |
+| 1024² RGB | contiguous | 43.593 | 4.620 | 9.44× | 7.999 |
+| 1024² RGB | strided | 42.160 | 7.870 | 5.36× | 7.999 |
+| 2048² RGB | contiguous | 159.028 | 17.173 | 9.26× | 7.999 |
+| 2048² RGB | strided | 161.830 | 33.044 | 4.90× | 7.999 |
+
+The 32² cases show no slowdown in this run, but sub-millisecond differences are
+particularly noisy. Read code is unchanged; incidental read timing differences
+are not claimed as an improvement. These results support the bulk-write approach,
+not a mandatory CI timing threshold.
+
+### Reproduce the comparison and allocations
+
+Use separate worktrees and installed-wheel environments for the two revisions.
+Copy `benchmarks/pfm_benchmark.py` from the optimized revision into the baseline
+worktree so both runs have identical instrumentation. In each worktree, run:
+
+```bash
+tox run -e py
+.tox/py/bin/python benchmarks/pfm_benchmark.py \
+  --sizes 32 1024 2048 --repeats 7 --warmup 2 --measure-allocations \
+  --output /tmp/justpfm-comparison.json
+```
+
+Use distinct output filenames for each revision, run them serially, and repeat
+in reverse order when evaluating sensitivity to machine state. Use
+`--byte-order big` to compare nonnative-endian data on this host.
+
+`--measure-allocations` adds one separate write **after** the timing samples.
+Only that write runs under `tracemalloc`; input construction and correctness
+validation are excluded. `write_traced_peak_bytes` includes Python and NumPy
+allocations exposed to tracemalloc, including the scratch buffer. It is not
+whole-process RSS, OS cache use, or proof that all native allocations are traced.
+The buffer's roughly 8 MiB traced peak on large images agrees with its configured
+bound; small Python/I/O allocations can bring the total slightly above 8 MiB.
+Process-lifetime RSS also includes this extra call when allocation tracing is
+enabled and remains unsuitable for isolating writer allocation.

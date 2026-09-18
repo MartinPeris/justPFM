@@ -1,0 +1,1256 @@
+{
+  "schema_version": 1,
+  "environment": {
+    "utc_timestamp": "2026-09-18T02:26:14.893408+00:00",
+    "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+    "python_executable": "/tmp/justpfm-fast-write/.tox/py/bin/python",
+    "numpy": "2.5.3",
+    "numpy_config": "{\n  \"Compilers\": {\n    \"c\": {\n      \"name\": \"gcc\",\n      \"linker\": \"ld.bfd\",\n      \"version\": \"14.2.1\",\n      \"commands\": \"cc\"\n    },\n    \"cython\": {\n      \"name\": \"cython\",\n      \"linker\": \"cython\",\n      \"version\": \"3.3.0\",\n      \"commands\": \"cython\"\n    },\n    \"c++\": {\n      \"name\": \"gcc\",\n      \"linker\": \"ld.bfd\",\n      \"version\": \"14.2.1\",\n      \"commands\": \"c++\"\n    }\n  },\n  \"Machine Information\": {\n    \"host\": {\n      \"cpu\": \"x86_64\",\n      \"family\": \"x86_64\",\n      \"endian\": \"little\",\n      \"system\": \"linux\"\n    },\n    \"build\": {\n      \"cpu\": \"x86_64\",\n      \"family\": \"x86_64\",\n      \"endian\": \"little\",\n      \"system\": \"linux\"\n    }\n  },\n  \"Build Dependencies\": {\n    \"blas\": {\n      \"name\": \"scipy-openblas\",\n      \"found\": true,\n      \"version\": \"0.3.34.106.0\",\n      \"detection method\": \"pkgconfig\",\n      \"include directory\": \"/opt/_internal/cpython-3.12.13/lib/python3.12/site-packages/scipy_openblas64/include\",\n      \"lib directory\": \"/opt/_internal/cpython-3.12.13/lib/python3.12/site-packages/scipy_openblas64/lib\",\n      \"openblas configuration\": \"OpenBLAS 0.3.34.106.0  USE64BITINT DYNAMIC_ARCH NO_AFFINITY Haswell MAX_THREADS=64\",\n      \"pc file directory\": \"/project/.openblas\"\n    },\n    \"lapack\": {\n      \"name\": \"scipy-openblas\",\n      \"found\": true,\n      \"version\": \"0.3.34.106.0\",\n      \"detection method\": \"pkgconfig\",\n      \"include directory\": \"/opt/_internal/cpython-3.12.13/lib/python3.12/site-packages/scipy_openblas64/include\",\n      \"lib directory\": \"/opt/_internal/cpython-3.12.13/lib/python3.12/site-packages/scipy_openblas64/lib\",\n      \"openblas configuration\": \"OpenBLAS 0.3.34.106.0  USE64BITINT DYNAMIC_ARCH NO_AFFINITY Haswell MAX_THREADS=64\",\n      \"pc file directory\": \"/project/.openblas\"\n    }\n  },\n  \"Python Information\": {\n    \"path\": \"/tmp/build-env-kabtnrrv/bin/python\",\n    \"version\": \"3.12\"\n  },\n  \"SIMD Extensions\": {\n    \"baseline\": [\n      \"X86_V2\"\n    ],\n    \"found\": [\n      \"X86_V3\",\n      \"X86_V4\",\n      \"AVX512_ICL\"\n    ],\n    \"not found\": [\n      \"AVX512_SPR\"\n    ]\n  }\n}\n",
+    "os": "Linux-7.0.0-30-generic-x86_64-with-glibc2.39",
+    "machine": "x86_64",
+    "cpu_model": "AMD Ryzen 9 7940HS w/ Radeon 780M Graphics",
+    "cpu_count": 16,
+    "cpu_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "host_byte_order": "little",
+    "library_module": "/tmp/justpfm-fast-write/.tox/py/lib/python3.12/site-packages/justpfm/justpfm.py",
+    "library_source_sha256": "56d550d3f7300624498155fdbb7bf6dec84c8e97dce81d295fb49158aad1ff45",
+    "git_revision": "5b6dc39f97f2b68b780f51ecb96137e8e6cbaaa0",
+    "git_status": "",
+    "temporary_parent": "/tmp",
+    "filesystem_block_size": 4096,
+    "memory_metric": "Linux process-lifetime peak RSS in KiB, including fixture generation, correctness checks, warmup and all timed calls; not per-call allocation or system memory use, and excludes filesystem cache.",
+    "allocation_metric": "Optional tracemalloc peak during one additional write after timings; excludes input creation and validation. Includes Python and NumPy allocations exposed to tracemalloc, not all native memory or OS cache.",
+    "cache_policy": "Warm/cache-eligible files: fixture creation, validation and warmup precede timings. No cache eviction, fsync, or durability measurement. Writes replace an existing file atomically; reads include allocation and optional scaling. Validation and result disposal are not timed."
+  },
+  "cases": [
+    {
+      "shape": [
+        32,
+        32
+      ],
+      "dtype": "<f4",
+      "operation": "read",
+      "layout": "contiguous",
+      "scale": 1.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "input_strides_bytes": [
+        128,
+        4
+      ],
+      "input_c_contiguous": true,
+      "payload_bytes": 4096,
+      "file_bytes": 4110,
+      "samples_seconds": [
+        3.094802377745509e-05,
+        3.7820020224899054e-05,
+        3.476499114185572e-05,
+        4.2449013562873006e-05,
+        3.2881012884899974e-05,
+        3.250999725423753e-05,
+        3.0736991902813315e-05
+      ],
+      "median_seconds": 3.2881012884899974e-05,
+      "payload_mib_per_second": 118.79956416409169,
+      "process_peak_rss_kib": 44700
+    },
+    {
+      "shape": [
+        32,
+        32
+      ],
+      "dtype": "<f4",
+      "operation": "read",
+      "layout": "contiguous",
+      "scale": 2.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "input_strides_bytes": [
+        128,
+        4
+      ],
+      "input_c_contiguous": true,
+      "payload_bytes": 4096,
+      "file_bytes": 4110,
+      "samples_seconds": [
+        3.951299004256725e-05,
+        4.5674998546019197e-05,
+        4.2539002606645226e-05,
+        6.00320054218173e-05,
+        5.0664006266742945e-05,
+        3.9453007047995925e-05,
+        3.839100827462971e-05
+      ],
+      "median_seconds": 4.2539002606645226e-05,
+      "payload_mib_per_second": 91.82749384419712,
+      "process_peak_rss_kib": 44940
+    },
+    {
+      "shape": [
+        32,
+        32
+      ],
+      "dtype": "<f4",
+      "operation": "write",
+      "layout": "contiguous",
+      "scale": 1.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "write_traced_peak_bytes": 10591,
+      "input_strides_bytes": [
+        128,
+        4
+      ],
+      "input_c_contiguous": true,
+      "payload_bytes": 4096,
+      "file_bytes": 4110,
+      "samples_seconds": [
+        0.00022348499624058604,
+        0.0002230640093330294,
+        0.00020573099027387798,
+        0.00021096100681461394,
+        0.00019423998310230672,
+        0.0002131850051227957,
+        0.00021143202320672572
+      ],
+      "median_seconds": 0.00021143202320672572,
+      "payload_mib_per_second": 18.475205130968735,
+      "process_peak_rss_kib": 44932
+    },
+    {
+      "shape": [
+        32,
+        32
+      ],
+      "dtype": "<f4",
+      "operation": "write",
+      "layout": "contiguous",
+      "scale": 2.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "write_traced_peak_bytes": 10591,
+      "input_strides_bytes": [
+        128,
+        4
+      ],
+      "input_c_contiguous": true,
+      "payload_bytes": 4096,
+      "file_bytes": 4110,
+      "samples_seconds": [
+        0.00020136300008744001,
+        0.00022015901049599051,
+        0.000233122002100572,
+        0.0001997110084630549,
+        0.00021736297640018165,
+        0.00022118998458608985,
+        0.00020764500368386507
+      ],
+      "median_seconds": 0.00021736297640018165,
+      "payload_mib_per_second": 17.971091787077384,
+      "process_peak_rss_kib": 44896
+    },
+    {
+      "shape": [
+        32,
+        32
+      ],
+      "dtype": "<f4",
+      "operation": "write",
+      "layout": "strided",
+      "scale": 1.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "write_traced_peak_bytes": 10591,
+      "input_strides_bytes": [
+        256,
+        8
+      ],
+      "input_c_contiguous": false,
+      "payload_bytes": 4096,
+      "file_bytes": 4110,
+      "samples_seconds": [
+        0.00022756200633011758,
+        0.00021305499831214547,
+        0.0002147679915651679,
+        0.00021097200806252658,
+        0.0002112609799951315,
+        0.00019329797942191362,
+        0.00020491000032052398
+      ],
+      "median_seconds": 0.0002112609799951315,
+      "payload_mib_per_second": 18.49016320993124,
+      "process_peak_rss_kib": 44992
+    },
+    {
+      "shape": [
+        32,
+        32
+      ],
+      "dtype": "<f4",
+      "operation": "write",
+      "layout": "strided",
+      "scale": 2.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "write_traced_peak_bytes": 10591,
+      "input_strides_bytes": [
+        256,
+        8
+      ],
+      "input_c_contiguous": false,
+      "payload_bytes": 4096,
+      "file_bytes": 4110,
+      "samples_seconds": [
+        0.00024533498799428344,
+        0.00026936997892335057,
+        0.000215148989809677,
+        0.00020329697872512043,
+        0.00019839699962176383,
+        0.00019695499213412404,
+        0.0001856139861047268
+      ],
+      "median_seconds": 0.00020329697872512043,
+      "payload_mib_per_second": 19.214500995027937,
+      "process_peak_rss_kib": 44844
+    },
+    {
+      "shape": [
+        32,
+        32,
+        3
+      ],
+      "dtype": "<f4",
+      "operation": "read",
+      "layout": "contiguous",
+      "scale": 1.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "input_strides_bytes": [
+        384,
+        12,
+        4
+      ],
+      "input_c_contiguous": true,
+      "payload_bytes": 12288,
+      "file_bytes": 12302,
+      "samples_seconds": [
+        3.591598942875862e-05,
+        4.432298010215163e-05,
+        4.0835002437233925e-05,
+        4.421200719662011e-05,
+        3.874200046993792e-05,
+        3.751899930648506e-05,
+        3.590699634514749e-05
+      ],
+      "median_seconds": 3.874200046993792e-05,
+      "payload_mib_per_second": 302.4817990256655,
+      "process_peak_rss_kib": 44772
+    },
+    {
+      "shape": [
+        32,
+        32,
+        3
+      ],
+      "dtype": "<f4",
+      "operation": "read",
+      "layout": "contiguous",
+      "scale": 2.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "input_strides_bytes": [
+        384,
+        12,
+        4
+      ],
+      "input_c_contiguous": true,
+      "payload_bytes": 12288,
+      "file_bytes": 12302,
+      "samples_seconds": [
+        4.390199319459498e-05,
+        5.1386014092713594e-05,
+        4.698798875324428e-05,
+        5.050399340689182e-05,
+        4.3751002522185445e-05,
+        4.214799264445901e-05,
+        4.1736988350749016e-05
+      ],
+      "median_seconds": 4.390199319459498e-05,
+      "payload_mib_per_second": 266.92979400859554,
+      "process_peak_rss_kib": 44704
+    },
+    {
+      "shape": [
+        32,
+        32,
+        3
+      ],
+      "dtype": "<f4",
+      "operation": "write",
+      "layout": "contiguous",
+      "scale": 1.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "write_traced_peak_bytes": 18815,
+      "input_strides_bytes": [
+        384,
+        12,
+        4
+      ],
+      "input_c_contiguous": true,
+      "payload_bytes": 12288,
+      "file_bytes": 12302,
+      "samples_seconds": [
+        0.00018068499048240483,
+        0.00018146701040677726,
+        0.00018561401520855725,
+        0.00019031300325877964,
+        0.00017105700680986047,
+        0.00017892199684865773,
+        0.00017729899263940752
+      ],
+      "median_seconds": 0.00018068499048240483,
+      "payload_mib_per_second": 64.85735184041852,
+      "process_peak_rss_kib": 44824
+    },
+    {
+      "shape": [
+        32,
+        32,
+        3
+      ],
+      "dtype": "<f4",
+      "operation": "write",
+      "layout": "contiguous",
+      "scale": 2.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "write_traced_peak_bytes": 18815,
+      "input_strides_bytes": [
+        384,
+        12,
+        4
+      ],
+      "input_c_contiguous": true,
+      "payload_bytes": 12288,
+      "file_bytes": 12302,
+      "samples_seconds": [
+        0.00023460498778149486,
+        0.00023023702669888735,
+        0.00022346401237882674,
+        0.0002159200084861368,
+        0.00021459799609147012,
+        0.00020843601669184864,
+        0.00021295499755069613
+      ],
+      "median_seconds": 0.0002159200084861368,
+      "payload_mib_per_second": 54.27357141268548,
+      "process_peak_rss_kib": 44680
+    },
+    {
+      "shape": [
+        32,
+        32,
+        3
+      ],
+      "dtype": "<f4",
+      "operation": "write",
+      "layout": "strided",
+      "scale": 1.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "write_traced_peak_bytes": 18815,
+      "input_strides_bytes": [
+        768,
+        24,
+        4
+      ],
+      "input_c_contiguous": false,
+      "payload_bytes": 12288,
+      "file_bytes": 12302,
+      "samples_seconds": [
+        0.0002509649784769863,
+        0.00027431899798102677,
+        0.00023623800370842218,
+        0.00023083799169398844,
+        0.00023487600265070796,
+        0.0002342750085517764,
+        0.00023083799169398844
+      ],
+      "median_seconds": 0.00023487600265070796,
+      "payload_mib_per_second": 49.89334741628479,
+      "process_peak_rss_kib": 44940
+    },
+    {
+      "shape": [
+        32,
+        32,
+        3
+      ],
+      "dtype": "<f4",
+      "operation": "write",
+      "layout": "strided",
+      "scale": 2.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "write_traced_peak_bytes": 18815,
+      "input_strides_bytes": [
+        768,
+        24,
+        4
+      ],
+      "input_c_contiguous": false,
+      "payload_bytes": 12288,
+      "file_bytes": 12302,
+      "samples_seconds": [
+        0.00017748901154845953,
+        0.00018309999722987413,
+        0.00017639697762206197,
+        0.0001774389820639044,
+        0.00017164801829494536,
+        0.00016886298544704914,
+        0.00017019599908962846
+      ],
+      "median_seconds": 0.00017639697762206197,
+      "payload_mib_per_second": 66.43396138627682,
+      "process_peak_rss_kib": 44860
+    },
+    {
+      "shape": [
+        1024,
+        1024
+      ],
+      "dtype": "<f4",
+      "operation": "read",
+      "layout": "contiguous",
+      "scale": 1.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "input_strides_bytes": [
+        4096,
+        4
+      ],
+      "input_c_contiguous": true,
+      "payload_bytes": 4194304,
+      "file_bytes": 4194322,
+      "samples_seconds": [
+        0.0002694590075407177,
+        0.0006679480138700455,
+        0.0006249489961192012,
+        0.0006263919931370765,
+        0.0006844500021543354,
+        0.0006361289997585118,
+        0.0006374320073518902
+      ],
+      "median_seconds": 0.0006361289997585118,
+      "payload_mib_per_second": 6288.032775613886,
+      "process_peak_rss_kib": 70128
+    },
+    {
+      "shape": [
+        1024,
+        1024
+      ],
+      "dtype": "<f4",
+      "operation": "read",
+      "layout": "contiguous",
+      "scale": 2.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "input_strides_bytes": [
+        4096,
+        4
+      ],
+      "input_c_contiguous": true,
+      "payload_bytes": 4194304,
+      "file_bytes": 4194322,
+      "samples_seconds": [
+        0.00028075999580323696,
+        0.0007595180068165064,
+        0.0008416709897574037,
+        0.0007800569874234498,
+        0.0007537580095231533,
+        0.0008047320006880909,
+        0.0007851560076233
+      ],
+      "median_seconds": 0.0007800569874234498,
+      "payload_mib_per_second": 5127.830484811261,
+      "process_peak_rss_kib": 70568
+    },
+    {
+      "shape": [
+        1024,
+        1024
+      ],
+      "dtype": "<f4",
+      "operation": "write",
+      "layout": "contiguous",
+      "scale": 1.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "write_traced_peak_bytes": 4200895,
+      "input_strides_bytes": [
+        4096,
+        4
+      ],
+      "input_c_contiguous": true,
+      "payload_bytes": 4194304,
+      "file_bytes": 4194322,
+      "samples_seconds": [
+        0.0013447829987853765,
+        0.0017614470270927995,
+        0.0016979380161501467,
+        0.0016698070103302598,
+        0.0017009440052788705,
+        0.0016880510083865374,
+        0.0016851650143507868
+      ],
+      "median_seconds": 0.0016880510083865374,
+      "payload_mib_per_second": 2369.59664140911,
+      "process_peak_rss_kib": 70520
+    },
+    {
+      "shape": [
+        1024,
+        1024
+      ],
+      "dtype": "<f4",
+      "operation": "write",
+      "layout": "contiguous",
+      "scale": 2.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "write_traced_peak_bytes": 4200895,
+      "input_strides_bytes": [
+        4096,
+        4
+      ],
+      "input_c_contiguous": true,
+      "payload_bytes": 4194304,
+      "file_bytes": 4194322,
+      "samples_seconds": [
+        0.0014147240144666284,
+        0.0016999219951685518,
+        0.0017262819746974856,
+        0.0018302440003026277,
+        0.0018173099961131811,
+        0.0017314510187134147,
+        0.0017049819871317595
+      ],
+      "median_seconds": 0.0017262819746974856,
+      "payload_mib_per_second": 2317.118558050727,
+      "process_peak_rss_kib": 70244
+    },
+    {
+      "shape": [
+        1024,
+        1024
+      ],
+      "dtype": "<f4",
+      "operation": "write",
+      "layout": "strided",
+      "scale": 1.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "write_traced_peak_bytes": 4200895,
+      "input_strides_bytes": [
+        8192,
+        8
+      ],
+      "input_c_contiguous": false,
+      "payload_bytes": 4194304,
+      "file_bytes": 4194322,
+      "samples_seconds": [
+        0.0017634110117796808,
+        0.0019947199907619506,
+        0.0020509730093181133,
+        0.0019985059916507453,
+        0.002012823009863496,
+        0.001990632008528337,
+        0.0020259360026102513
+      ],
+      "median_seconds": 0.0019985059916507453,
+      "payload_mib_per_second": 2001.4951252140313,
+      "process_peak_rss_kib": 74532
+    },
+    {
+      "shape": [
+        1024,
+        1024
+      ],
+      "dtype": "<f4",
+      "operation": "write",
+      "layout": "strided",
+      "scale": 2.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "write_traced_peak_bytes": 4200895,
+      "input_strides_bytes": [
+        8192,
+        8
+      ],
+      "input_c_contiguous": false,
+      "payload_bytes": 4194304,
+      "file_bytes": 4194322,
+      "samples_seconds": [
+        0.001746387977618724,
+        0.0021387960005085915,
+        0.002004306996241212,
+        0.0020202070008963346,
+        0.0020068219746463,
+        0.00206797500140965,
+        0.0020198849961161613
+      ],
+      "median_seconds": 0.0020198849961161613,
+      "payload_mib_per_second": 1980.3107640738,
+      "process_peak_rss_kib": 74560
+    },
+    {
+      "shape": [
+        1024,
+        1024,
+        3
+      ],
+      "dtype": "<f4",
+      "operation": "read",
+      "layout": "contiguous",
+      "scale": 1.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "input_strides_bytes": [
+        12288,
+        12,
+        4
+      ],
+      "input_c_contiguous": true,
+      "payload_bytes": 12582912,
+      "file_bytes": 12582930,
+      "samples_seconds": [
+        0.0016987900016829371,
+        0.0019045219814870507,
+        0.0019224249990656972,
+        0.0018965770141221583,
+        0.0018644980154931545,
+        0.0018628640100359917,
+        0.0018997529987245798
+      ],
+      "median_seconds": 0.0018965770141221583,
+      "payload_mib_per_second": 6327.188355994217,
+      "process_peak_rss_kib": 121588
+    },
+    {
+      "shape": [
+        1024,
+        1024,
+        3
+      ],
+      "dtype": "<f4",
+      "operation": "read",
+      "layout": "contiguous",
+      "scale": 2.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "input_strides_bytes": [
+        12288,
+        12,
+        4
+      ],
+      "input_c_contiguous": true,
+      "payload_bytes": 12582912,
+      "file_bytes": 12582930,
+      "samples_seconds": [
+        0.001978860003873706,
+        0.0023882090172264725,
+        0.0022922499920241535,
+        0.0022379899746738374,
+        0.002337996003916487,
+        0.002201072027673945,
+        0.0022181030071806163
+      ],
+      "median_seconds": 0.0022379899746738374,
+      "payload_mib_per_second": 5361.9543142720595,
+      "process_peak_rss_kib": 121600
+    },
+    {
+      "shape": [
+        1024,
+        1024,
+        3
+      ],
+      "dtype": "<f4",
+      "operation": "write",
+      "layout": "contiguous",
+      "scale": 1.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "write_traced_peak_bytes": 8387088,
+      "input_strides_bytes": [
+        12288,
+        12,
+        4
+      ],
+      "input_c_contiguous": true,
+      "payload_bytes": 12582912,
+      "file_bytes": 12582930,
+      "samples_seconds": [
+        0.004558112006634474,
+        0.004633051983546466,
+        0.004636689001927152,
+        0.004565786977764219,
+        0.004619927000021562,
+        0.00462110000080429,
+        0.0046194860187824816
+      ],
+      "median_seconds": 0.004619927000021562,
+      "payload_mib_per_second": 2597.443639248844,
+      "process_peak_rss_kib": 121500
+    },
+    {
+      "shape": [
+        1024,
+        1024,
+        3
+      ],
+      "dtype": "<f4",
+      "operation": "write",
+      "layout": "contiguous",
+      "scale": 2.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "write_traced_peak_bytes": 8387088,
+      "input_strides_bytes": [
+        12288,
+        12,
+        4
+      ],
+      "input_c_contiguous": true,
+      "payload_bytes": 12582912,
+      "file_bytes": 12582930,
+      "samples_seconds": [
+        0.004311996017349884,
+        0.004632309981388971,
+        0.004684435989474878,
+        0.004489896004088223,
+        0.004698783013736829,
+        0.004582958004903048,
+        0.004642129002604634
+      ],
+      "median_seconds": 0.004632309981388971,
+      "payload_mib_per_second": 2590.50021440963,
+      "process_peak_rss_kib": 121448
+    },
+    {
+      "shape": [
+        1024,
+        1024,
+        3
+      ],
+      "dtype": "<f4",
+      "operation": "write",
+      "layout": "strided",
+      "scale": 1.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "write_traced_peak_bytes": 8387133,
+      "input_strides_bytes": [
+        24576,
+        24,
+        4
+      ],
+      "input_c_contiguous": false,
+      "payload_bytes": 12582912,
+      "file_bytes": 12582930,
+      "samples_seconds": [
+        0.008400066988542676,
+        0.008083920984063298,
+        0.007855757983634248,
+        0.007860776997404173,
+        0.008133643015753478,
+        0.007859595003537834,
+        0.007869533001212403
+      ],
+      "median_seconds": 0.007869533001212403,
+      "payload_mib_per_second": 1524.8681209102554,
+      "process_peak_rss_kib": 133828
+    },
+    {
+      "shape": [
+        1024,
+        1024,
+        3
+      ],
+      "dtype": "<f4",
+      "operation": "write",
+      "layout": "strided",
+      "scale": 2.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "write_traced_peak_bytes": 8387133,
+      "input_strides_bytes": [
+        24576,
+        24,
+        4
+      ],
+      "input_c_contiguous": false,
+      "payload_bytes": 12582912,
+      "file_bytes": 12582930,
+      "samples_seconds": [
+        0.008430403016973287,
+        0.008172065019607544,
+        0.008082457992713898,
+        0.007937738992040977,
+        0.008094821008853614,
+        0.008080814994173124,
+        0.008058153005549684
+      ],
+      "median_seconds": 0.008082457992713898,
+      "payload_mib_per_second": 1484.696859645624,
+      "process_peak_rss_kib": 133824
+    },
+    {
+      "shape": [
+        2048,
+        2048
+      ],
+      "dtype": "<f4",
+      "operation": "read",
+      "layout": "contiguous",
+      "scale": 1.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "input_strides_bytes": [
+        8192,
+        4
+      ],
+      "input_c_contiguous": true,
+      "payload_bytes": 16777216,
+      "file_bytes": 16777234,
+      "samples_seconds": [
+        0.0019294189987704158,
+        0.0023490760067943484,
+        0.002302379987668246,
+        0.0024082659801933914,
+        0.0023135799856390804,
+        0.0023071680043358356,
+        0.0023149629996623844
+      ],
+      "median_seconds": 0.0023135799856390804,
+      "payload_mib_per_second": 6915.689148123538,
+      "process_peak_rss_kib": 147164
+    },
+    {
+      "shape": [
+        2048,
+        2048
+      ],
+      "dtype": "<f4",
+      "operation": "read",
+      "layout": "contiguous",
+      "scale": 2.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "input_strides_bytes": [
+        8192,
+        4
+      ],
+      "input_c_contiguous": true,
+      "payload_bytes": 16777216,
+      "file_bytes": 16777234,
+      "samples_seconds": [
+        0.0024919710122048855,
+        0.003033555025467649,
+        0.0028199599764775485,
+        0.0028829770162701607,
+        0.0027961050218436867,
+        0.002871834993129596,
+        0.002871965989470482
+      ],
+      "median_seconds": 0.002871834993129596,
+      "payload_mib_per_second": 5571.350735079637,
+      "process_peak_rss_kib": 147236
+    },
+    {
+      "shape": [
+        2048,
+        2048
+      ],
+      "dtype": "<f4",
+      "operation": "write",
+      "layout": "contiguous",
+      "scale": 1.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "write_traced_peak_bytes": 8395280,
+      "input_strides_bytes": [
+        8192,
+        4
+      ],
+      "input_c_contiguous": true,
+      "payload_bytes": 16777216,
+      "file_bytes": 16777234,
+      "samples_seconds": [
+        0.005649436003295705,
+        0.005686756019713357,
+        0.0059372409887146205,
+        0.005674863001331687,
+        0.005786491004982963,
+        0.005691544996807352,
+        0.005988726014038548
+      ],
+      "median_seconds": 0.005691544996807352,
+      "payload_mib_per_second": 2811.187473519955,
+      "process_peak_rss_kib": 147376
+    },
+    {
+      "shape": [
+        2048,
+        2048
+      ],
+      "dtype": "<f4",
+      "operation": "write",
+      "layout": "contiguous",
+      "scale": 2.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "write_traced_peak_bytes": 8395325,
+      "input_strides_bytes": [
+        8192,
+        4
+      ],
+      "input_c_contiguous": true,
+      "payload_bytes": 16777216,
+      "file_bytes": 16777234,
+      "samples_seconds": [
+        0.005855679017258808,
+        0.005913436005357653,
+        0.006051763019058853,
+        0.0058848529879469424,
+        0.005890903994441032,
+        0.005936999019468203,
+        0.005837053991854191
+      ],
+      "median_seconds": 0.005890903994441032,
+      "payload_mib_per_second": 2716.0517324842576,
+      "process_peak_rss_kib": 147188
+    },
+    {
+      "shape": [
+        2048,
+        2048
+      ],
+      "dtype": "<f4",
+      "operation": "write",
+      "layout": "strided",
+      "scale": 1.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "write_traced_peak_bytes": 8395325,
+      "input_strides_bytes": [
+        16384,
+        8
+      ],
+      "input_c_contiguous": false,
+      "payload_bytes": 16777216,
+      "file_bytes": 16777234,
+      "samples_seconds": [
+        0.006880149012431502,
+        0.007161540997913107,
+        0.006901177985128015,
+        0.007377521018497646,
+        0.006897400016896427,
+        0.006899434025399387,
+        0.007044402998872101
+      ],
+      "median_seconds": 0.006901177985128015,
+      "payload_mib_per_second": 2318.444769064046,
+      "process_peak_rss_kib": 163708
+    },
+    {
+      "shape": [
+        2048,
+        2048
+      ],
+      "dtype": "<f4",
+      "operation": "write",
+      "layout": "strided",
+      "scale": 2.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "write_traced_peak_bytes": 8395325,
+      "input_strides_bytes": [
+        16384,
+        8
+      ],
+      "input_c_contiguous": false,
+      "payload_bytes": 16777216,
+      "file_bytes": 16777234,
+      "samples_seconds": [
+        0.007144247996620834,
+        0.006876400992041454,
+        0.0071230289759114385,
+        0.00702644998091273,
+        0.0070494230021722615,
+        0.006907499016961083,
+        0.007226069981697947
+      ],
+      "median_seconds": 0.0070494230021722615,
+      "payload_mib_per_second": 2269.6893057871034,
+      "process_peak_rss_kib": 163500
+    },
+    {
+      "shape": [
+        2048,
+        2048,
+        3
+      ],
+      "dtype": "<f4",
+      "operation": "read",
+      "layout": "contiguous",
+      "scale": 1.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "input_strides_bytes": [
+        24576,
+        12,
+        4
+      ],
+      "input_c_contiguous": true,
+      "payload_bytes": 50331648,
+      "file_bytes": 50331666,
+      "samples_seconds": [
+        0.00694945701980032,
+        0.007145470008254051,
+        0.007379425020189956,
+        0.0072412180015817285,
+        0.007461286004399881,
+        0.007729763980023563,
+        0.007459863991243765
+      ],
+      "median_seconds": 0.007379425020189956,
+      "payload_mib_per_second": 6504.5718153749085,
+      "process_peak_rss_kib": 352080
+    },
+    {
+      "shape": [
+        2048,
+        2048,
+        3
+      ],
+      "dtype": "<f4",
+      "operation": "read",
+      "layout": "contiguous",
+      "scale": 2.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "input_strides_bytes": [
+        24576,
+        12,
+        4
+      ],
+      "input_c_contiguous": true,
+      "payload_bytes": 50331648,
+      "file_bytes": 50331666,
+      "samples_seconds": [
+        0.008671079995110631,
+        0.008402171020861715,
+        0.008376993995625526,
+        0.008374439988983795,
+        0.008608484000433236,
+        0.008489241998177022,
+        0.008380851009860635
+      ],
+      "median_seconds": 0.008402171020861715,
+      "payload_mib_per_second": 5712.80921095524,
+      "process_peak_rss_kib": 351932
+    },
+    {
+      "shape": [
+        2048,
+        2048,
+        3
+      ],
+      "dtype": "<f4",
+      "operation": "write",
+      "layout": "contiguous",
+      "scale": 1.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "write_traced_peak_bytes": 8387088,
+      "input_strides_bytes": [
+        24576,
+        12,
+        4
+      ],
+      "input_c_contiguous": true,
+      "payload_bytes": 50331648,
+      "file_bytes": 50331666,
+      "samples_seconds": [
+        0.016300426999805495,
+        0.017114376998506486,
+        0.017324244981864467,
+        0.01675976801197976,
+        0.01735787800862454,
+        0.01718617998994887,
+        0.017172894993564114
+      ],
+      "median_seconds": 0.017172894993564114,
+      "payload_mib_per_second": 2795.1023993327253,
+      "process_peak_rss_kib": 351992
+    },
+    {
+      "shape": [
+        2048,
+        2048,
+        3
+      ],
+      "dtype": "<f4",
+      "operation": "write",
+      "layout": "contiguous",
+      "scale": 2.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "write_traced_peak_bytes": 8387943,
+      "input_strides_bytes": [
+        24576,
+        12,
+        4
+      ],
+      "input_c_contiguous": true,
+      "payload_bytes": 50331648,
+      "file_bytes": 50331666,
+      "samples_seconds": [
+        0.0157429639948532,
+        0.01620676400489174,
+        0.015875529003096744,
+        0.015992695989552885,
+        0.016156620986294,
+        0.01599653300945647,
+        0.01633768598549068
+      ],
+      "median_seconds": 0.01599653300945647,
+      "payload_mib_per_second": 3000.6502016170903,
+      "process_peak_rss_kib": 352080
+    },
+    {
+      "shape": [
+        2048,
+        2048,
+        3
+      ],
+      "dtype": "<f4",
+      "operation": "write",
+      "layout": "strided",
+      "scale": 1.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "write_traced_peak_bytes": 8387943,
+      "input_strides_bytes": [
+        49152,
+        24,
+        4
+      ],
+      "input_c_contiguous": false,
+      "payload_bytes": 50331648,
+      "file_bytes": 50331666,
+      "samples_seconds": [
+        0.031664988986449316,
+        0.031549064005957916,
+        0.03380081002251245,
+        0.03270153098856099,
+        0.03322499099886045,
+        0.033295913017354906,
+        0.03304352500708774
+      ],
+      "median_seconds": 0.03304352500708774,
+      "payload_mib_per_second": 1452.629523929549,
+      "process_peak_rss_kib": 401160
+    },
+    {
+      "shape": [
+        2048,
+        2048,
+        3
+      ],
+      "dtype": "<f4",
+      "operation": "write",
+      "layout": "strided",
+      "scale": 2.0,
+      "repeats": 7,
+      "warmup": 2,
+      "measure_allocations": true,
+      "write_traced_peak_bytes": 8388033,
+      "input_strides_bytes": [
+        49152,
+        24,
+        4
+      ],
+      "input_c_contiguous": false,
+      "payload_bytes": 50331648,
+      "file_bytes": 50331666,
+      "samples_seconds": [
+        0.032590754999546334,
+        0.03440620101173408,
+        0.03353035802138038,
+        0.03207020999980159,
+        0.03203563601709902,
+        0.032137464004335925,
+        0.0321260429918766
+      ],
+      "median_seconds": 0.032137464004335925,
+      "payload_mib_per_second": 1493.583936601965,
+      "process_peak_rss_kib": 401100
+    }
+  ]
+}

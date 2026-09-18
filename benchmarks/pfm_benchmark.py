@@ -12,6 +12,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import tracemalloc
 from datetime import datetime, timezone
 from pathlib import Path
 from statistics import median
@@ -118,7 +119,19 @@ def run_worker(case, directory):
             # Checking and freeing the returned array are outside the timer.
             validate(result)
             del result
+        allocation = {}
+        if case.get("measure_allocations") and case["operation"] == "write":
+            # Separate from timing: input creation and validation are untraced.
+            tracemalloc.start()
+            try:
+                operation()
+                _, peak = tracemalloc.get_traced_memory()
+            finally:
+                tracemalloc.stop()
+            validate(None)
+            allocation["write_traced_peak_bytes"] = peak
         result = dict(case)
+        result.update(allocation)
         result.update(
             input_strides_bytes=list(pixels.strides),
             input_c_contiguous=bool(pixels.flags.c_contiguous),
@@ -178,6 +191,11 @@ def environment(directory):
             "correctness checks, warmup and all timed calls; not per-call allocation "
             "or system memory use, and excludes filesystem cache."
         ),
+        "allocation_metric": (
+            "Optional tracemalloc peak during one additional write after timings; "
+            "excludes input creation and validation. Includes Python and NumPy "
+            "allocations exposed to tracemalloc, not all native memory or OS cache."
+        ),
         "cache_policy": (
             "Warm/cache-eligible files: fixture creation, validation and warmup "
             "precede timings. No cache eviction, fsync, or durability measurement. "
@@ -198,6 +216,11 @@ def main():
     )
     parser.add_argument("--temp-dir", type=Path, default=Path(tempfile.gettempdir()))
     parser.add_argument("--output", type=Path, default=Path("benchmark-results.json"))
+    parser.add_argument(
+        "--measure-allocations",
+        action="store_true",
+        help="measure traced peak allocation in a separate, untimed write",
+    )
     parser.add_argument("--worker", help=argparse.SUPPRESS)
     args = parser.parse_args()
     if sys.platform != "linux":
@@ -229,6 +252,7 @@ def main():
                             scale=scale,
                             repeats=args.repeats,
                             warmup=args.warmup,
+                            measure_allocations=args.measure_allocations,
                         )
                         command = [
                             sys.executable,

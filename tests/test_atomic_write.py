@@ -24,12 +24,10 @@ def test_failed_save_preserves_destination(tmp_path, monkeypatch, existing, fail
     def fail_replace(*_args):
         raise OSError("injected replace failure")
 
-    class BrokenArray(np.ndarray):
+    def fail_payload(file, _data):
         """Simulate a partial pixel write followed by disk failure."""
-
-        def tofile(self, file, *args, **kwargs):
-            file.write(b"partial pixels")
-            raise OSError("injected write failure")
+        file.write(b"partial pixels")
+        raise OSError("injected write failure")
 
     real_temporary = justpfm.NamedTemporaryFile
 
@@ -48,7 +46,7 @@ def test_failed_save_preserves_destination(tmp_path, monkeypatch, existing, fail
             raise OSError("injected close failure")
 
     if failure == "write":
-        data = data.view(BrokenArray)
+        monkeypatch.setattr(justpfm, "_write_pfm_payload", fail_payload)
     elif failure == "close":
         monkeypatch.setattr(justpfm, "NamedTemporaryFile", FailingClose)
     else:
