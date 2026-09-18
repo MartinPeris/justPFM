@@ -100,22 +100,6 @@ date. The workflow alone does not configure repository protection. At the time
 this harness was introduced, `main` had no branch protection.
 
 
-## Release validation
-
-The `Release` workflow calls the same `Quality` workflow, including all Python
-compatibility tests, for the triggering commit. Its distribution job depends
-on the complete quality workflow succeeding. Both checks and builds explicitly
-check out `github.sha`, so a passing check on a different commit cannot authorize
-publication. A failure or cancellation prevents building and publishing.
-
-Workflow pull requests and manual runs perform a dry run: quality checks,
-source/wheel builds, strict metadata validation, and artifact upload. The PyPI
-publish step runs only on a `release: published` event. Use the manual `Release`
-workflow on a feature branch to exercise the path without publishing a package.
-Release changes should be merged before creating the release tag; publication
-uses the workflow from that release commit.
-
-
 ## Static typing
 
 `tox run -e types` is a blocking part of the shared commit hook and CI harness.
@@ -134,3 +118,18 @@ scripts are not executed by mypy, so its sample filenames never create files.
 Annotations are postponed for legacy imports. On Python 3.7/3.8, evaluating
 `PathLike[str]` with `typing.get_type_hints` is not supported; static checking
 uses the installed annotations without requiring that runtime evaluation.
+
+## Release validation
+
+The `Release` workflow calls the same `Quality` workflow, including all Python
+compatibility tests, for the triggering commit. Its distribution job depends
+on the complete quality workflow succeeding. Both checks and builds explicitly
+check out `github.sha`, so a passing check on a different commit cannot authorize
+publication. A failure or cancellation prevents building and publishing.
+
+Workflow pull requests and manual runs perform a dry run: quality checks,
+source/wheel builds, strict metadata validation, and artifact upload. The PyPI
+publish step runs only on a `release: published` event. Use the manual `Release`
+workflow on a feature branch to exercise the path without publishing a package.
+Release changes should be merged before creating the release tag; publication
+uses the workflow from that release commit.
