@@ -1,7 +1,7 @@
 # Development and quality checks
 
 Use Python 3.12 for the complete developer harness. The library's advertised
-Python 3.7–3.12 versions are also tested separately in CI.
+Python 3.7–3.14 versions are also tested separately in CI.
 
 ## Set up once per clone
 
@@ -86,10 +86,15 @@ JUSTPFM_TEST_PYTHON=python3.7 tox run -r -e py
 Recreate environments with `tox run -r` when diagnosing dependency changes. Transitive and runtime dependencies are resolved by pip;
 these pins are not a complete dependency lockfile.
 
+See [SUPPORT.md](SUPPORT.md) for the compatibility policy. Test-tool pins in
+`tox.ini` select legacy versions on Python 3.7–3.9 and current versions on
+Python 3.10–3.14. Both tracks run the same tests and 100% coverage gate. Update
+Hypothesis pins in the test extra together with tox so installation paths agree.
+
 ## CI and merge protection
 
 The `Quality` workflow runs the identical pre-commit command on Python 3.12,
-plus installed-wheel tests and coverage on Python 3.7–3.12. All checks are
+plus installed-wheel tests and coverage on Python 3.7–3.14. All checks are
 blocking, and the stable **Quality gate** job fails if any prerequisite fails or
 is cancelled. CI runs on pushes and pull requests without path filters.
 
