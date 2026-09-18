@@ -22,11 +22,12 @@ reuse those environments, but package builds can still require network access.
 pre-commit run --all-files
 ```
 
-The hook runs `tox run`, which executes all three environments:
+The hook runs `tox run`, which executes all four environments:
 
 | Environment | Required checks |
 | --- | --- |
 | `lint` | Ruff lint, import ordering, and formatting; failures block commits |
+| `types` | Strict mypy checks of the library and public API usage against an installed wheel |
 | `py` | Build and install a wheel, run pytest, require 100% statement and branch coverage |
 | `package` | Build an sdist, build a wheel from it, validate both artifacts with `twine check --strict` |
 
@@ -103,6 +104,25 @@ In GitHub's branch protection or ruleset settings for `main`, require the
 date. The workflow alone does not configure repository protection. At the time
 this harness was introduced, `main` had no branch protection.
 
+
+## Static typing
+
+`tox run -e types` is a blocking part of the shared commit hook and CI harness.
+It checks the library in strict mode and a downstream example against the
+installed wheel. The `py.typed` marker is included in wheel and source artifacts
+so downstream type checkers can read the public annotations. Float32 array
+annotations describe the dtype; dimensionality and positive sizes remain runtime
+validation because NumPy's array types do not encode those invariants here.
+
+The type-checking tools run on Python 3.12 with pinned NumPy 2.2.6 stubs and a
+Python 3.10 static target. The library retains Python 3.7-compatible syntax and
+runs on every supported interpreter in the separate compatibility matrix; the
+static target alone is not proof of legacy runtime compatibility. Test/example
+scripts are not executed by mypy, so its sample filenames never create files.
+
+Annotations are postponed for legacy imports. On Python 3.7/3.8, evaluating
+`PathLike[str]` with `typing.get_type_hints` is not supported; static checking
+uses the installed annotations without requiring that runtime evaluation.
 
 ## Release validation
 
