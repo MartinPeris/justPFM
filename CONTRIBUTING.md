@@ -130,3 +130,7 @@ Python 3.10 static target. The library retains Python 3.7-compatible syntax and
 runs on every supported interpreter in the separate compatibility matrix; the
 static target alone is not proof of legacy runtime compatibility. Test/example
 scripts are not executed by mypy, so its sample filenames never create files.
+
+Annotations are postponed for legacy imports. On Python 3.7/3.8, evaluating
+`PathLike[str]` with `typing.get_type_hints` is not supported; static checking
+uses the installed annotations without requiring that runtime evaluation.
