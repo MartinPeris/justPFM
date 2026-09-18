@@ -50,7 +50,7 @@ The existing `from justpfm import justpfm` import remains supported.
   array's byte order; callers supply only the magnitude.
 - Rows are written bottom-first as required by PFM.
 
-`read_pfm(file_name) -> numpy.ndarray`
+`read_pfm(file_name, *, max_pixels=None) -> numpy.ndarray`
 
 - Returns float32 pixels shaped `(H, W, C)`, where `C` is 1 for grayscale or 3
   for RGB. The returned dtype retains the file's byte order.
@@ -65,12 +65,29 @@ The existing `from justpfm import justpfm` import remains supported.
 - Requires positive dimensions, a finite nonzero header scale, and exactly the
   expected raster bytes. It checks the file size before allocating pixel data
   and limits reads to the declared number of samples.
+- Each of the three header lines must end in a newline and occupy at most
+  **4096 bytes including the newline**. Overlong and truncated headers raise
+  `ValueError`; header reads use bounded buffers.
+- Set the keyword-only `max_pixels` argument to a positive built-in integer to
+  reject images whose `H * W` exceeds that limit before allocating their raster.
+  The default `None` imposes no pixel-count limit. Booleans, other types, zero,
+  and negative limits raise `ValueError` before the file is opened. The limit
+  counts pixels rather than channel samples, so RGB and grayscale images of
+  equal dimensions have the same pixel count.
 
 Invalid shapes, dtypes, dimensions, scales, headers, and payload lengths raise
 `ValueError`. Filesystem failures such as missing files or denied access raise
 `OSError` subclasses. Both functions operate on filesystem files, not in-memory
-file-like objects. These validation checks do not impose a maximum size on a
-valid image; sufficient memory is still required.
+file-like objects. Sufficient memory is still required. For untrusted files,
+choose a pixel limit appropriate for the application, for example:
+
+```python
+loaded = read_pfm("upload.pfm", max_pixels=4_000_000)
+```
+
+The raster needs 4 bytes per grayscale pixel or 12 bytes per RGB pixel. This
+limit bounds that allocation, not total process memory, application copies, or
+other overhead. With `max_pixels=None`, large valid images remain supported.
 
 ### Saving files
 
