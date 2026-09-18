@@ -3,7 +3,7 @@ repos:
   - repo: local
     hooks:
       - id: quality
-        name: Full quality harness (lint, tests, coverage, packaging)
+        name: Full quality harness (lint, types, tests, coverage, packaging)
         entry: tox run
         language: python
         language_version: python3.12
