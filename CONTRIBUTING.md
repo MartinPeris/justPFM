@@ -164,7 +164,15 @@ Release changes should be merged before creating the release tag; publication
 uses the workflow from that release commit.
 
 For a release candidate, update the version in `setup.py` and the corresponding
-entry in `CHANGELOG.md`, including any upgrade notes. Push the PR and run the
+entry in `CHANGELOG.md`, including any upgrade notes. Review the README
+performance badges against the release candidate: record a fresh baseline when
+the measured implementation changes, then update the raw results, benchmark
+table, badge values, and README version/date context together as described in
+[README status badges](#readme-status-badges). Keep older measurements explicitly
+labeled with their measured revision; a new release date alone does not justify
+relabelling an old measurement.
+
+Push the PR and run the
 manual `Release` workflow on its branch. Review the uploaded wheel and source
 archive and confirm their metadata versions match the intended release.
 

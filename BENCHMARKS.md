@@ -69,6 +69,48 @@ processes prevent peaks from earlier cases carrying into later cases.
 
 ## Recorded baseline
 
+The README badges summarize **justPFM 1.2.0**, installed from PyPI and measured
+on 2026-09-18. [Raw JSON](benchmarks/results/linux-1.2.0-2026-09-18.json) includes
+24 cases, seven timing samples per case, and separate write-allocation probes.
+The benchmark worktree was clean at release revision
+`39f0ccb768464202aad81b7eab87cba47dc3e36d`; the installed module's SHA-256 matches
+that revision's source and is recorded in the artifact.
+
+Environment: AMD Ryzen 9 7940HS, 16 logical CPUs; Linux 7.0.0-30 on x86-64;
+Python 3.12.3; NumPy 2.5.3; native little-endian float32; `/tmp` on ext4
+(`/dev/nvme0n1p2`). Two warmups and seven samples followed the correctness call.
+CPU frequency, other host workloads, and caches were not isolated or reset.
+These remain warm/cache-eligible measurements with atomic writes and no `fsync`.
+
+Values are median milliseconds, with logical throughput in MiB/s in parentheses.
+Write columns use scale 1; the raw artifact also includes scale 2. The badges
+select the 2048² RGB, scale-1 read and contiguous-write cells.
+
+| Image | Payload | Read, scale 1 | Read, scale 2 | Write, contiguous | Write, strided |
+| --- | --- | --- | --- | --- | --- |
+| 1024² grayscale | 4 MiB | 0.625 (6403) | 0.541 (7391) | 1.734 (2307) | 2.037 (1964) |
+| 1024² RGB | 12 MiB | 1.825 (6577) | 1.769 (6785) | 4.474 (2682) | 7.987 (1502) |
+| 2048² grayscale | 16 MiB | 2.284 (7005) | 2.081 (7690) | 5.782 (2767) | 7.047 (2270) |
+| 2048² RGB | 48 MiB | 7.100 (6761) | 9.207 (5213) | 16.510 (2907) | 32.070 (1497) |
+
+These are single-host observations, not portable guarantees or CI thresholds.
+Small differences from historical read timings do not establish a regression
+or improvement. See the controlled [bulk writer comparison](#bulk-writer-comparison)
+for the optimization's before/after measurements.
+
+To reproduce this baseline, use the benchmark driver from tag `v1.2.0` and a
+Python 3.12 environment with the released package and measured NumPy version:
+
+```bash
+python -m pip install justpfm==1.2.0 numpy==2.5.3
+python benchmarks/pfm_benchmark.py \
+  --sizes 1024 2048 --repeats 7 --warmup 2 --measure-allocations \
+  --output /tmp/justpfm-1.2.0-baseline.json
+```
+
+## Historical baseline before bulk writes
+
+
 [Raw JSON, 2026-09-18](benchmarks/results/linux-2026-09-18.json) contains all
 24 cases and five individual timings per case. Measured library revision:
 `d29455646534ce4357f022b83fae0caa18c75a9b`; benchmark files were untracked at

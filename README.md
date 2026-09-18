@@ -8,15 +8,15 @@ A small NumPy-based Python module to read and write Portable Float Map images.
 [![Supported Python: 3.7–3.14](https://img.shields.io/badge/Python-3.7%E2%80%933.14-blue)](SUPPORT.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-[![Read baseline: 6.932 ms](https://img.shields.io/badge/read%20baseline-6.932%20ms-blue)](BENCHMARKS.md#recorded-baseline)
-[![Write baseline: 158.395 ms](https://img.shields.io/badge/write%20baseline-158.395%20ms-blue)](BENCHMARKS.md#recorded-baseline)
+[![Read baseline: 7.100 ms](https://img.shields.io/badge/read%20baseline-7.100%20ms-blue)](BENCHMARKS.md#recorded-baseline)
+[![Write baseline: 16.510 ms](https://img.shields.io/badge/write%20baseline-16.510%20ms-blue)](BENCHMARKS.md#recorded-baseline)
 
 CI/tests tracks the latest `main` push through the [full quality harness](CONTRIBUTING.md#ci-and-merge-protection).
 Coverage is the required threshold; measured reports are in each CI run's
 `coverage` artifact. PyPI shows the published release; Python support describes
 this repository revision.
 
-Performance badges show **2026-09-18 baseline medians**, not live CI results:
+Performance badges show **justPFM 1.2.0 baseline medians (2026-09-18)**, not live CI results:
 2048 × 2048 RGB float32 (48 MiB), scale 1, native byte order, contiguous write
 input, on Linux with an AMD Ryzen 9 7940HS. These are warm/cache-eligible reads
 and atomic writes without `fsync`. See [benchmark details](BENCHMARKS.md#recorded-baseline)
