@@ -1,22 +1,41 @@
 """A small Python module to read/write PFM (Portable Float Map) images"""
 
-from math import isclose
+from math import isclose, isfinite
+from os import PathLike, chmod, fstat, replace
 from pathlib import Path
+from stat import S_IMODE, S_ISREG
 from sys import byteorder
-from typing import Tuple
+from tempfile import NamedTemporaryFile
+from typing import Tuple, Union
 
 import numpy as np
 
 
-def write_pfm(file_name: Path, data: np.ndarray, scale: float = 1) -> None:
+def write_pfm(
+    file_name: Union[str, PathLike], data: np.ndarray, scale: float = 1
+) -> None:
     """
-    Writes the data into the file in PFM format
+    Write float32 pixels to a str or path-like destination; return None.
+
+    Accept positive (H, W), (H, W, 1), or (H, W, 3) shapes in either byte
+    order, including strided arrays and nonfinite pixels. Scale must be positive
+    and finite: it is recorded in the header without changing stored samples.
+    Reading applies that magnitude to samples. Invalid data/scale raise ValueError;
+    filesystem failures raise OSError. Rows are stored bottom-first.
+
+    Atomically replace the destination after closing the file.
+
+    A sibling temporary file is removed on failure, preserving any existing
+    destination. Existing regular file permissions are preserved; new files
+    have private permissions (0600 on POSIX). A destination symlink is replaced,
+    leaving its target intact. Other metadata, including ownership, is not copied.
+    Atomic replacement does not guarantee durability after a power failure.
     """
-    if isclose(scale, 0.0):
-        raise ValueError("0 is not a valid value for scale")
+    if not isfinite(scale) or scale <= 0:
+        raise ValueError("scale must be positive and finite")
     if not _is_valid_shape(data):
         raise ValueError("data has invalid shape: " + str(data.shape))
-    if data.dtype != "float32":
+    if data.dtype.kind != "f" or data.dtype.itemsize != 4:
         raise ValueError("data must be float32: " + str(data.dtype))
 
     identifier = _get_pfm_identifier_from_data(data)
@@ -24,11 +43,31 @@ def write_pfm(file_name: Path, data: np.ndarray, scale: float = 1) -> None:
     flipped_data = np.flipud(data)
     scale *= _get_pfm_endianness_from_data(data)
 
-    with open(file_name, "wb") as file:
-        file.write(identifier.encode())
-        file.write((f"\n{width} {height}\n").encode())
-        file.write((f"{scale}\n").encode())
-        flipped_data.tofile(file)
+    destination = Path(file_name)
+    temporary = NamedTemporaryFile(
+        mode="wb", dir=destination.parent, prefix=".justpfm-", delete=False
+    )
+    try:
+        with temporary as file:
+            file.write(identifier.encode())
+            file.write((f"\n{width} {height}\n").encode())
+            file.write((f"{scale}\n").encode())
+            flipped_data.tofile(file)
+        try:
+            destination_stat = destination.lstat()
+        except FileNotFoundError:
+            pass
+        else:
+            if S_ISREG(destination_stat.st_mode):
+                chmod(temporary.name, S_IMODE(destination_stat.st_mode))
+        replace(temporary.name, destination)
+    finally:
+        try:
+            # Windows cannot unlink read-only files after a failed replacement.
+            chmod(temporary.name, 0o600)
+            Path(temporary.name).unlink()
+        except FileNotFoundError:
+            pass
 
 
 def _get_pfm_identifier_from_data(data: np.ndarray) -> str:
@@ -43,6 +82,8 @@ def _get_pfm_identifier_from_data(data: np.ndarray) -> str:
 
 def _is_valid_shape(data: np.ndarray) -> bool:
     """Return true if the shape of the data is valid"""
+    if 0 in data.shape:
+        return False
     if len(data.shape) == 2:
         return True
 
@@ -66,13 +107,33 @@ def _get_pfm_endianness_from_data(data: np.ndarray) -> float:
     )
 
 
-def read_pfm(file_name: Path) -> np.ndarray:
-    """Read a file in PFM format into data"""
+def read_pfm(file_name: Union[str, PathLike]) -> np.ndarray:
+    """Read a str or path-like PFM file as an (H, W, C) float32 array.
+
+    C is 1 for grayscale or 3 for RGB. The dtype retains the file byte order;
+    top-first rows have negative strides. Use np.ascontiguousarray(result,
+    dtype=np.float32) when native byte order and contiguous storage are needed.
+    Samples are multiplied by the positive header scale magnitude, except scales
+    math.isclose to 1 (relative tolerance 1e-9). Nonfinite pixels are accepted;
+    scaling follows NumPy float32 arithmetic.
+    Invalid headers, dimensions, scales, or payload lengths raise ValueError;
+    filesystem failures raise OSError. Payload size is checked before allocation.
+    """
     with open(file_name, "rb") as file:
         channels = _get_pfm_channels_from_line(file.readline())
         width, height = _get_pfm_width_and_height_from_line(file.readline())
         scale, endianness = _get_pfm_scale_and_endianness_from_line(file.readline())
-        data = np.fromfile(file, endianness + "f")
+        sample_count = width * height * channels
+        expected_bytes = sample_count * 4
+        remaining_bytes = fstat(file.fileno()).st_size - file.tell()
+        if remaining_bytes != expected_bytes:
+            raise ValueError(
+                f"Invalid PFM payload size: expected {expected_bytes} bytes, "
+                f"got {remaining_bytes}"
+            )
+        data = np.fromfile(file, endianness + "f", count=sample_count)
+        if data.size != sample_count:
+            raise ValueError("PFM payload was truncated while reading")
         shape = (height, width, channels)
         data = np.reshape(data, shape)
         data = np.flipud(data)
@@ -103,6 +164,8 @@ def _get_pfm_width_and_height_from_line(line: bytes) -> Tuple[int, int]:
         height = int(items[1])
     else:
         raise ValueError("Not a valid PFM header")
+    if width <= 0 or height <= 0:
+        raise ValueError("PFM width and height must be positive")
     return width, height
 
 
@@ -110,8 +173,8 @@ def _get_pfm_scale_and_endianness_from_line(line: bytes) -> Tuple[float, str]:
     """Parse the scale and endianness from the PFM header"""
     decoded_line = line.rstrip().decode("UTF-8")
     scale = float(decoded_line)
-    if isclose(scale, 0.0):
-        raise ValueError("0 is not a valid value for scale")
+    if not isfinite(scale) or scale == 0:
+        raise ValueError("PFM scale must be finite and nonzero")
     endianness = ""
     if scale < 0:
         endianness = "<"

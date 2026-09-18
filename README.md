@@ -1,5 +1,6 @@
 # justPFM
-A small Python module to read/write PFM (Portable Float Map) images
+
+A small NumPy-based Python module to read and write Portable Float Map images.
 
 ## Install
 
@@ -10,21 +11,86 @@ pip install justpfm
 ## Usage
 
 ```python
+from pathlib import Path
+
 import numpy as np
-from justpfm import justpfm
+from justpfm import read_pfm, write_pfm
 
-# Write a test PFM file
-data_to_write = np.ones((5, 5), dtype="float32")
-justpfm.write_pfm(file_name="test.pfm", data=data_to_write)
+# Grayscale: the first array axis is height, and rows are top-first.
+path = Path("grayscale.pfm")
+pixels = np.arange(15, dtype=np.float32).reshape(3, 5)
+write_pfm(path, pixels)
+loaded = read_pfm(path)
+assert loaded.shape == (3, 5, 1)
+np.testing.assert_array_equal(loaded[..., 0], pixels)
 
-# Read the test PFM file
-read_data = justpfm.read_pfm(file_name="test.pfm")
+# RGB uses the last axis for red, green, and blue.
+rgb = np.zeros((3, 5, 3), dtype=np.float32)
+rgb[..., 0] = 1
+write_pfm("rgb.pfm", rgb, scale=0.5)
+np.testing.assert_array_equal(read_pfm("rgb.pfm"), rgb * 0.5)
 ```
 
-That's it!
+The existing `from justpfm import justpfm` import remains supported.
+
+## API contract
+
+`write_pfm(file_name, data, scale=1) -> None`
+
+- `file_name` accepts a string or a filesystem path object such as `pathlib.Path`.
+- `data` must be a NumPy float32 array with positive height and width, shaped
+  `(H, W)`, `(H, W, 1)`, or `(H, W, 3)`. Both little- and big-endian float32
+  dtypes are supported, including noncontiguous arrays. Pixel NaNs and infinities
+  are allowed.
+- `scale` must be positive and finite. The writer stores the original pixel
+  samples and records the scale in the header. The header sign describes the
+  array's byte order; callers supply only the magnitude.
+- Rows are written bottom-first as required by PFM.
+
+`read_pfm(file_name) -> numpy.ndarray`
+
+- Returns float32 pixels shaped `(H, W, C)`, where `C` is 1 for grayscale or 3
+  for RGB. The returned dtype retains the file's byte order.
+- Applies the header scale magnitude to pixel values, except magnitudes within
+  `math.isclose(scale, 1.0)` (relative tolerance `1e-9`). Thus nonunit write scales
+  generally change values when read back; scaling uses float32 arithmetic and
+  may overflow or underflow for extreme values.
+- Returns top-first rows using a view with negative row strides. For native
+  byte order and contiguous storage, use
+  `np.ascontiguousarray(loaded, dtype=np.float32)`. Use `loaded[..., 0]` to remove
+  the grayscale channel axis.
+- Requires positive dimensions, a finite nonzero header scale, and exactly the
+  expected raster bytes. It checks the file size before allocating pixel data
+  and limits reads to the declared number of samples.
+
+Invalid shapes, dtypes, dimensions, scales, headers, and payload lengths raise
+`ValueError`. Filesystem failures such as missing files or denied access raise
+`OSError` subclasses. Both functions operate on filesystem files, not in-memory
+file-like objects. These validation checks do not impose a maximum size on a
+valid image; sufficient memory is still required.
+
+### Saving files
+
+Writes use a temporary file in the destination directory, then atomically replace
+its directory entry after writing and closing. A failed write preserves an
+existing destination and cleans up the temporary file. The destination directory
+must permit creating temporary files and replacing entries.
+
+Existing regular file permission bits are preserved. New files have private
+permissions (`0600` on POSIX). A destination symlink is replaced with a regular
+file; its target is left unchanged. Other metadata, including ownership, is not
+copied. Atomic replacement does not guarantee durability after a power failure.
 
 ## Development
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and commit-hook installation.
 Run `pre-commit run --all-files` to execute the same lint, formatting, tests,
 100% statement/branch coverage, and packaging gates used by CI.
+
+Property tests vary dimensions, pixel values, array layout, byte order, scale,
+and malformed payload sizes. They also check the reader against independently
+encoded binary fixtures. Local and CI runs use the same deterministic Hypothesis
+profile: 60 examples per property, no example database, and no timing deadline.
+Health checks remain enabled. Hypothesis is pinned to `6.79.4` in the test extra
+and tox to retain Python 3.7 compatibility; its [release metadata](https://pypi.org/project/hypothesis/6.79.4/)
+declares Python 3.7 or newer.

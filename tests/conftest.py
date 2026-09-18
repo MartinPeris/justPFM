@@ -2,6 +2,13 @@
 
 import numpy as np
 import pytest
+from hypothesis import settings
+
+# Identical, bounded example generation locally and in every CI test job.
+settings.register_profile(
+    "justpfm", max_examples=60, derandomize=True, database=None, deadline=None
+)
+settings.load_profile("justpfm")
 
 
 @pytest.fixture

@@ -70,9 +70,20 @@ binary fixtures and nonuniform images check behavior beyond line execution.
 
 Tool versions are centralized in `tox.ini` and `requirements-dev.txt`; the hook
 also pins tox and virtualenv to bootstrap its isolated environment. Update
-those pins together. The virtualenv pin preserves Python 3.7 test support; CI
-runs tox under Python 3.12 and selects each target test interpreter separately. Recreate environments with `tox run -r` when diagnosing
-dependency changes. Transitive and runtime dependencies are resolved by pip;
+those pins together. Virtualenv 20.36.1 includes the directory-creation security
+fix. CI runs tox under Python 3.12 and selects each target test interpreter
+separately. Python 3.7 remains a supported target, but its compatible seed
+packages are no longer bundled. That compatibility job enables seed downloads
+and selects pip 24.0, setuptools 68.0.0, and wheel 0.42.0 explicitly. For local
+Python 3.7 tests, use the same environment variables:
+
+```bash
+VIRTUALENV_DOWNLOAD=true VIRTUALENV_PIP=24.0 \
+VIRTUALENV_SETUPTOOLS=68.0.0 VIRTUALENV_WHEEL=0.42.0 \
+JUSTPFM_TEST_PYTHON=python3.7 tox run -r -e py
+```
+
+Recreate environments with `tox run -r` when diagnosing dependency changes. Transitive and runtime dependencies are resolved by pip;
 these pins are not a complete dependency lockfile.
 
 ## CI and merge protection
@@ -86,3 +97,19 @@ In GitHub's branch protection or ruleset settings for `main`, require the
 **Quality gate** status check before merging, preferably with the branch up to
 date. The workflow alone does not configure repository protection. At the time
 this harness was introduced, `main` had no branch protection.
+
+
+## Release validation
+
+The `Release` workflow calls the same `Quality` workflow, including all Python
+compatibility tests, for the triggering commit. Its distribution job depends
+on the complete quality workflow succeeding. Both checks and builds explicitly
+check out `github.sha`, so a passing check on a different commit cannot authorize
+publication. A failure or cancellation prevents building and publishing.
+
+Workflow pull requests and manual runs perform a dry run: quality checks,
+source/wheel builds, strict metadata validation, and artifact upload. The PyPI
+publish step runs only on a `release: published` event. Use the manual `Release`
+workflow on a feature branch to exercise the path without publishing a package.
+Release changes should be merged before creating the release tag; publication
+uses the workflow from that release commit.
