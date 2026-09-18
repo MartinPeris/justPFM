@@ -86,6 +86,11 @@ JUSTPFM_TEST_PYTHON=python3.7 tox run -r -e py
 Recreate environments with `tox run -r` when diagnosing dependency changes. Transitive and runtime dependencies are resolved by pip;
 these pins are not a complete dependency lockfile.
 
+See [SUPPORT.md](SUPPORT.md) for the compatibility policy. Test-tool pins in
+`tox.ini` select legacy versions on Python 3.7–3.9 and current versions on
+Python 3.10–3.14. Both tracks run the same tests and 100% coverage gate. Update
+Hypothesis pins in the test extra together with tox so installation paths agree.
+
 ## CI and merge protection
 
 The `Quality` workflow runs the identical pre-commit command on Python 3.12,
@@ -113,9 +118,3 @@ publish step runs only on a `release: published` event. Use the manual `Release`
 workflow on a feature branch to exercise the path without publishing a package.
 Release changes should be merged before creating the release tag; publication
 uses the workflow from that release commit.
-
-
-See [SUPPORT.md](SUPPORT.md) for the compatibility policy. Test-tool pins in
-`tox.ini` select legacy versions on Python 3.7–3.9 and current versions on
-Python 3.10–3.14. Both tracks run the same tests and 100% coverage gate. Update
-Hypothesis pins in the test extra together with tox so installation paths agree.
