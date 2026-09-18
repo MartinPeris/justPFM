@@ -159,6 +159,23 @@ Annotations are postponed for legacy imports. On Python 3.7/3.8, evaluating
 `PathLike[str]` with `typing.get_type_hints` is not supported; static checking
 uses the installed annotations without requiring that runtime evaluation.
 
+## Packaging configuration
+
+`pyproject.toml` is the source of package metadata, version, runtime dependencies,
+optional extras, package discovery, and the `py.typed` marker. Release version
+bumps belong in `[project].version`. Use `python -m build` to build distributions
+or `python -m pip install .` to install a checkout.
+
+Keep build configuration compatible with setuptools versions supporting Python
+3.7. `tool.setuptools.license-files` preserves license inclusion with those
+versions; the newer PEP 639 fields require setuptools 77 or later.
+
+`MANIFEST.in` selects documentation, tests, and fixtures for the source archive.
+`tox.ini` defines the quality environments and their dependencies;
+`requirements-dev.txt` bootstraps the tools that run them. These have separate
+roles from package metadata. The `test` and `dev` package extras remain available;
+use the documented developer setup for the complete quality harness.
+
 ## Release validation
 
 The `Release` workflow calls the same `Quality` workflow, including all Python
@@ -174,7 +191,7 @@ workflow on a feature branch to exercise the path without publishing a package.
 Release changes should be merged before creating the release tag; publication
 uses the workflow from that release commit.
 
-For a release candidate, update the version in `setup.py` and the corresponding
+For a release candidate, update the version in `pyproject.toml` and the corresponding
 entry in `CHANGELOG.md`, including any upgrade notes. Review the README
 performance badges against the release candidate: record a fresh baseline when
 the measured implementation changes, then update the raw results, benchmark
