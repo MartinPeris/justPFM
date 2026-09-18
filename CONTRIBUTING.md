@@ -105,6 +105,30 @@ date. The workflow alone does not configure repository protection. At the time
 this harness was introduced, `main` had no branch protection.
 
 
+## README status badges
+
+The CI/tests badge queries the `Quality` workflow's latest `push` run on `main`;
+it covers the whole workflow, including the unit-test matrix and interoperability.
+The PyPI badge queries the published package version. Both are externally cached,
+so follow their links for the underlying status. All badges use Shields.io;
+no additional CI credentials or publishing workflow is required.
+
+The coverage badge is a static **gate requirement**, not an independently
+updated coverage measurement. Keep it aligned with `fail_under` and branch
+coverage settings in `pyproject.toml`. Actual coverage is recorded in the test
+logs and the `coverage` artifact of each Quality run. Keep the Python and
+license badges aligned with `SUPPORT.md`, the CI matrix, and `LICENSE`.
+
+Performance badges intentionally summarize the dated baseline in
+[BENCHMARKS.md](BENCHMARKS.md#recorded-baseline). To update them, record a new
+reproducible result following that document, retain its environment/revision
+metadata and raw samples, and update the baseline table, README context, badge
+image URLs, and alternative text together. Select the 2048 × 2048 RGB, scale-1,
+contiguous-input read/write cases and convert `median_seconds` to milliseconds
+(three decimal places). If the workload changes, update its description too.
+Do not relabel a historical baseline as current performance or add timing
+thresholds to the mandatory harness.
+
 ## Static typing
 
 `tox run -e types` is a blocking part of the shared commit hook and CI harness.
