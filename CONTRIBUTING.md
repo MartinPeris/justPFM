@@ -163,6 +163,19 @@ workflow on a feature branch to exercise the path without publishing a package.
 Release changes should be merged before creating the release tag; publication
 uses the workflow from that release commit.
 
+For a release candidate, update the version in `setup.py` and the corresponding
+entry in `CHANGELOG.md`, including any upgrade notes. Push the PR and run the
+manual `Release` workflow on its branch. Review the uploaded wheel and source
+archive and confirm their metadata versions match the intended release.
+
+After merging the reviewed PR, run the release dry run on the final `main`
+commit. Replace the changelog's release-candidate label with the publication date
+before the final release commit. Create the matching `vX.Y.Z` tag on that checked
+commit, then publish the GitHub release with the changelog notes. Publishing the
+release triggers PyPI upload; a manual workflow run or draft release does not.
+A successful dry run validates checks and distributions, but does not exercise
+the PyPI credential. Verify the published package and installation after upload.
+
 ## Independent interoperability checks
 
 The normal hook and unit-test matrix always read checked-in grayscale/RGB PFM

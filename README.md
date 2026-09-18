@@ -130,6 +130,11 @@ permissions (`0600` on POSIX). A destination symlink is replaced with a regular
 file; its target is left unchanged. Other metadata, including ownership, is not
 copied. Atomic replacement does not guarantee durability after a power failure.
 
+Writes use bulk serialization with reusable pixel scratch space bounded by the
+larger of 8 MiB and one image row. Data already contiguous in file order needs
+no pixel scratch buffer. See the [before/after measurements](BENCHMARKS.md#bulk-writer-comparison)
+for the speed and memory tradeoff.
+
 ## Development
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and commit-hook installation.
