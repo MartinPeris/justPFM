@@ -1,7 +1,7 @@
 # Development and quality checks
 
 Use Python 3.12 for the complete developer harness. The library's advertised
-Python 3.7–3.12 versions are also tested separately in CI.
+Python 3.10–3.14 versions are also tested separately in CI.
 
 ## Set up once per clone
 
@@ -70,18 +70,9 @@ binary fixtures and nonuniform images check behavior beyond line execution.
 
 Tool versions are centralized in `tox.ini` and `requirements-dev.txt`; the hook
 also pins tox and virtualenv to bootstrap its isolated environment. Update
-those pins together. Virtualenv 20.36.1 includes the directory-creation security
-fix. CI runs tox under Python 3.12 and selects each target test interpreter
-separately. Python 3.7 remains a supported target, but its compatible seed
-packages are no longer bundled. That compatibility job enables seed downloads
-and selects pip 24.0, setuptools 68.0.0, and wheel 0.42.0 explicitly. For local
-Python 3.7 tests, use the same environment variables:
-
-```bash
-VIRTUALENV_DOWNLOAD=true VIRTUALENV_PIP=24.0 \
-VIRTUALENV_SETUPTOOLS=68.0.0 VIRTUALENV_WHEEL=0.42.0 \
-JUSTPFM_TEST_PYTHON=python3.7 tox run -r -e py
-```
+those pins together. CI runs tox under Python 3.12 and selects each supported
+target interpreter separately. All supported targets use bundled environment
+seeds; legacy Python 3.7 seed overrides are no longer needed.
 
 Recreate environments with `tox run -r` when diagnosing dependency changes. Transitive and runtime dependencies are resolved by pip;
 these pins are not a complete dependency lockfile.
@@ -89,7 +80,7 @@ these pins are not a complete dependency lockfile.
 ## CI and merge protection
 
 The `Quality` workflow runs the identical pre-commit command on Python 3.12,
-plus installed-wheel tests and coverage on Python 3.7–3.12. All checks are
+plus installed-wheel tests and coverage on Python 3.10–3.14. All checks are
 blocking, and the stable **Quality gate** job fails if any prerequisite fails or
 is cancelled. CI runs on pushes and pull requests without path filters.
 

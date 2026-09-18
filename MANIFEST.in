@@ -1,2 +1,3 @@
 include CONTRIBUTING.md requirements-dev.txt tox.ini
 recursive-include tests *.py
+include SUPPORT.md

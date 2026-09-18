@@ -1,5 +1,4 @@
 # Use Python 3.12 for the full developer harness.
-pre-commit==3.5.0
-tox==4.11.4
-# Includes the directory-creation security fix; CI selects Python 3.7 seed versions.
-virtualenv==20.36.1
+pre-commit==4.6.2
+tox==4.61.5
+virtualenv==21.7.11

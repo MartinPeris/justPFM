@@ -7,7 +7,7 @@ repos:
         entry: tox run
         language: python
         language_version: python3.12
-        additional_dependencies: [tox==4.11.4, virtualenv==20.36.1]
+        additional_dependencies: [tox==4.61.5, virtualenv==21.7.11]
         pass_filenames: false
         always_run: true
         require_serial: true
