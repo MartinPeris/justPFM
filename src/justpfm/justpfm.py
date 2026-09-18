@@ -8,12 +8,13 @@ from pathlib import Path
 from stat import S_IMODE, S_ISREG
 from sys import byteorder
 from tempfile import NamedTemporaryFile
-from typing import Any, BinaryIO, Optional, Tuple, Union
+from typing import IO, Any, BinaryIO, Optional, Tuple, Union
 
 import numpy as np
 import numpy.typing as npt
 
 _MAX_HEADER_LINE_BYTES = 4096
+_WRITE_BUFFER_BYTES = 8 * 1024 * 1024
 
 
 def write_pfm(
@@ -59,7 +60,7 @@ def write_pfm(
             file.write(identifier.encode())
             file.write((f"\n{width} {height}\n").encode())
             file.write((f"{scale}\n").encode())
-            flipped_data.tofile(file)
+            _write_pfm_payload(file.file, flipped_data)
         try:
             destination_stat = destination.lstat()
         except FileNotFoundError:
@@ -75,6 +76,21 @@ def write_pfm(
             Path(temporary.name).unlink()
         except FileNotFoundError:
             pass
+
+
+def _write_pfm_payload(file: IO[bytes], data: npt.NDArray[np.float32]) -> None:
+    """Serialize in bulk, using at most one row or 8 MiB of pixel scratch space."""
+    if data.flags.c_contiguous:
+        data.tofile(file)
+        return
+    row_bytes = data[0].size * data.dtype.itemsize
+    rows = max(1, _WRITE_BUFFER_BYTES // row_bytes)
+    buffer = np.empty((min(rows, data.shape[0]),) + data.shape[1:], dtype=data.dtype)
+    for start in range(0, data.shape[0], rows):
+        source = data[start : start + rows]
+        block = buffer[: source.shape[0]]
+        np.copyto(block, source)
+        block.tofile(file)
 
 
 def _get_pfm_identifier_from_data(data: npt.NDArray[Any]) -> str:
