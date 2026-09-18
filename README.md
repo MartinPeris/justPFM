@@ -2,6 +2,26 @@
 
 A small NumPy-based Python module to read and write Portable Float Map images.
 
+[![CI and tests on main](https://img.shields.io/github/actions/workflow/status/MartinPeris/justPFM/quality.yml?branch=main&event=push&label=CI%20%26%20tests)](https://github.com/MartinPeris/justPFM/actions/workflows/quality.yml?query=branch%3Amain+event%3Apush)
+[![Coverage gate: 100% statements and branches](https://img.shields.io/badge/coverage%20gate-100%25%20statements%20%2B%20branches-brightgreen)](CONTRIBUTING.md#run-the-same-checks-as-ci)
+[![PyPI version](https://img.shields.io/pypi/v/justpfm)](https://pypi.org/project/justpfm/)
+[![Supported Python: 3.7–3.14](https://img.shields.io/badge/Python-3.7%E2%80%933.14-blue)](SUPPORT.md)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
+[![Read baseline: 6.932 ms](https://img.shields.io/badge/read%20baseline-6.932%20ms-blue)](BENCHMARKS.md#recorded-baseline)
+[![Write baseline: 158.395 ms](https://img.shields.io/badge/write%20baseline-158.395%20ms-blue)](BENCHMARKS.md#recorded-baseline)
+
+CI/tests tracks the latest `main` push through the [full quality harness](CONTRIBUTING.md#ci-and-merge-protection).
+Coverage is the required threshold; measured reports are in each CI run's
+`coverage` artifact. PyPI shows the published release; Python support describes
+this repository revision.
+
+Performance badges show **2026-09-18 baseline medians**, not live CI results:
+2048 × 2048 RGB float32 (48 MiB), scale 1, native byte order, contiguous write
+input, on Linux with an AMD Ryzen 9 7940HS. These are warm/cache-eligible reads
+and atomic writes without `fsync`. See [benchmark details](BENCHMARKS.md#recorded-baseline)
+for the measured revision, environment, raw samples, and reproduction commands.
+
 ## Install
 
 Supported Python versions: **3.7–3.14**. See [SUPPORT.md](SUPPORT.md) for the
