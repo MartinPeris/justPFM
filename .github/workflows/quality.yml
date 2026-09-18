@@ -42,7 +42,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: ['3.7', '3.8', '3.9', '3.10', '3.11', '3.12']
+        python: ['3.7', '3.8', '3.9', '3.10', '3.11', '3.12', '3.13', '3.14']
     steps:
       - uses: actions/checkout@v4
         with:
@@ -68,16 +68,22 @@ jobs:
         env:
           JUSTPFM_TEST_PYTHON: ${{ steps.target.outputs.python-path }}
 
+  interoperability:
+    name: Independent interoperability
+    uses: ./.github/workflows/interoperability.yml
+
   quality:
     name: Quality gate
     if: always()
-    needs: [harness, compatibility]
+    needs: [harness, compatibility, interoperability]
     runs-on: ubuntu-latest
     steps:
       - name: Require every quality job to pass
         env:
           HARNESS_RESULT: ${{ needs.harness.result }}
           COMPATIBILITY_RESULT: ${{ needs.compatibility.result }}
+          INTEROPERABILITY_RESULT: ${{ needs.interoperability.result }}
         run: |
           test "$HARNESS_RESULT" = success
           test "$COMPATIBILITY_RESULT" = success
+          test "$INTEROPERABILITY_RESULT" = success
