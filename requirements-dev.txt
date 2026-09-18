@@ -1,4 +1,5 @@
 # Use Python 3.12 for the full developer harness.
 pre-commit==4.6.2
-tox==4.61.5
-virtualenv==21.7.11
+tox==4.11.4
+# Patched environment builder retaining legacy target interpreter support.
+virtualenv==20.36.1
