@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.2.0 — release candidate
+## 1.2.0 — 2026-09-18
 
 - Add `encode_pfm` and `decode_pfm` for complete PFM bytes, without filesystem
   access or additional dependencies. Share validation and scale semantics with
