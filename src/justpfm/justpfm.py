@@ -6,9 +6,11 @@ from pathlib import Path
 from stat import S_IMODE, S_ISREG
 from sys import byteorder
 from tempfile import NamedTemporaryFile
-from typing import Tuple, Union
+from typing import BinaryIO, Optional, Tuple, Union
 
 import numpy as np
+
+_MAX_HEADER_LINE_BYTES = 4096
 
 
 def write_pfm(
@@ -107,7 +109,9 @@ def _get_pfm_endianness_from_data(data: np.ndarray) -> float:
     )
 
 
-def read_pfm(file_name: Union[str, PathLike]) -> np.ndarray:
+def read_pfm(
+    file_name: Union[str, PathLike], *, max_pixels: Optional[int] = None
+) -> np.ndarray:
     """Read a str or path-like PFM file as an (H, W, C) float32 array.
 
     C is 1 for grayscale or 3 for RGB. The dtype retains the file byte order;
@@ -118,11 +122,24 @@ def read_pfm(file_name: Union[str, PathLike]) -> np.ndarray:
     scaling follows NumPy float32 arithmetic.
     Invalid headers, dimensions, scales, or payload lengths raise ValueError;
     filesystem failures raise OSError. Payload size is checked before allocation.
+    Each of the three header lines must end in a newline and fit in 4096 bytes,
+    including that newline. max_pixels optionally bounds H * W before allocation;
+    supply a positive built-in int (not bool), or None for no pixel-count limit.
+    Invalid limits and images exceeding the limit raise ValueError.
     """
+    if max_pixels is not None:
+        if isinstance(max_pixels, bool) or not isinstance(max_pixels, int):
+            raise ValueError("max_pixels must be a positive integer or None")
+        if max_pixels <= 0:
+            raise ValueError("max_pixels must be a positive integer or None")
     with open(file_name, "rb") as file:
-        channels = _get_pfm_channels_from_line(file.readline())
-        width, height = _get_pfm_width_and_height_from_line(file.readline())
-        scale, endianness = _get_pfm_scale_and_endianness_from_line(file.readline())
+        channels = _get_pfm_channels_from_line(_read_pfm_header_line(file))
+        width, height = _get_pfm_width_and_height_from_line(_read_pfm_header_line(file))
+        if max_pixels is not None and width * height > max_pixels:
+            raise ValueError(f"PFM image exceeds max_pixels limit of {max_pixels}")
+        scale, endianness = _get_pfm_scale_and_endianness_from_line(
+            _read_pfm_header_line(file)
+        )
         sample_count = width * height * channels
         expected_bytes = sample_count * 4
         remaining_bytes = fstat(file.fileno()).st_size - file.tell()
@@ -140,6 +157,16 @@ def read_pfm(file_name: Union[str, PathLike]) -> np.ndarray:
         if not isclose(scale, 1.0):
             data *= scale
         return data
+
+
+def _read_pfm_header_line(file: BinaryIO) -> bytes:
+    """Read a newline-terminated header line using a bounded buffer."""
+    line = file.readline(_MAX_HEADER_LINE_BYTES + 1)
+    if len(line) > _MAX_HEADER_LINE_BYTES:
+        raise ValueError("PFM header line exceeds 4096 bytes")
+    if not line.endswith(b"\n"):
+        raise ValueError("Truncated PFM header: missing newline")
+    return line
 
 
 def _get_pfm_channels_from_line(line: bytes) -> int:
